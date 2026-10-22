@@ -15,10 +15,11 @@ export default function Services() {
           if (!list.length) return null;
           return (
             <div key={c.id} className="svc-group">
-              <h2 className="svc-group-title"><span>{c.icon}</span> {pick(c.name_en, c.name_ur)}</h2>
+              <h2 className="svc-group-title">{c.image_url ? <img className="svc-group-img" src={c.image_url} alt="" /> : <span>{c.icon}</span>} {pick(c.name_en, c.name_ur)}</h2>
               <div className="svc-grid">
                 {list.map((s) => (
                   <div key={s.id} className="svc-card">
+                    {s.image_url && <img className="svc-img" src={s.image_url} alt="" loading="lazy" />}
                     <div>
                       <h3>{pick(s.name_en, s.name_ur)}</h3>
                       <p className="muted">{pick(s.description_en, s.description_ur)}</p>

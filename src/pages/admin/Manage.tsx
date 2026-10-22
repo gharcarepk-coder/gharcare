@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
-import { Area, callAuthHelper, Category, normalizePhone, prettyPhone, Profile, rs, Service, Settings, Staff, supabase, useApp, waLink } from "../../lib/data";
+import { Area, callAuthHelper, uploadImage, Category, normalizePhone, prettyPhone, Profile, rs, Service, Settings, Staff, supabase, useApp, waLink } from "../../lib/data";
 
 // ======================================================================= Staff
 const emptyStaff = { full_name: "", phone: "", cnic: "", category_id: "", area_id: "", daily_wage: 0, status: "active", notes: "" };
@@ -102,6 +102,26 @@ export function StaffPage() {
   );
 }
 
+// ======================================================================= Image picker
+function ImagePick({ url, folder, onChange, size = 56 }: { url: string | null; folder: string; onChange: (u: string | null) => void; size?: number }) {
+  const [busy, setBusy] = useState(false);
+  const pick = async (f?: File) => {
+    if (!f) return;
+    setBusy(true);
+    try { onChange(await uploadImage(f, folder)); } catch (e) { alert((e as Error).message); }
+    setBusy(false);
+  };
+  return (
+    <div className="img-pick" style={{ width: size, height: size }}>
+      {url ? <img src={url} alt="" /> : <span>{busy ? "…" : "📷"}</span>}
+      <label title="Upload picture">
+        <input type="file" accept="image/*" onChange={(e) => pick(e.target.files?.[0])} hidden />
+      </label>
+      {url && <button type="button" className="img-x" title="Remove picture" onClick={() => onChange(null)}>✕</button>}
+    </div>
+  );
+}
+
 // ======================================================================= Services
 export function ServicesPage() {
   const { refreshCatalog } = useApp();
@@ -149,14 +169,15 @@ export function ServicesPage() {
   return (
     <div>
       <div className="admin-head">
-        <h1 className="admin-title">Services & Rates</h1>
+        <div><h1 className="admin-title">Services & Rates</h1><p className="muted small">Click 📷 to upload a picture. Edit names (English / اردو), rates, then press Save all changes.</p></div>
         <div className="btn-row"><button className="btn btn-ghost" onClick={addCat}>+ Category</button><button className="btn" onClick={saveAll}>Save all changes</button></div>
       </div>
       {msg && <p className="ok">{msg}</p>}
       {cats.map((c) => (
         <div key={c.id} className="panel svc-admin">
           <div className="svc-admin-cat">
-            <input className="icon-input" value={c.icon} onChange={(e) => updCat(c.id, { icon: e.target.value })} aria-label="Icon" />
+            <ImagePick url={c.image_url} folder="categories" onChange={(u) => updCat(c.id, { image_url: u })} size={64} />
+            <input className="icon-input" value={c.icon} onChange={(e) => updCat(c.id, { icon: e.target.value })} aria-label="Icon" title="Emoji shown if no picture" />
             <input value={c.name_en} onChange={(e) => updCat(c.id, { name_en: e.target.value })} aria-label="Category English" />
             <input value={c.name_ur} onChange={(e) => updCat(c.id, { name_ur: e.target.value })} dir="rtl" aria-label="Category Urdu" />
             <input type="number" className="w-num" value={c.sort_order} onChange={(e) => updCat(c.id, { sort_order: Number(e.target.value) })} title="Order" />
@@ -164,10 +185,11 @@ export function ServicesPage() {
           </div>
           <div className="table-wrap">
             <table className="table compact">
-              <thead><tr><th>Service (EN)</th><th>Service (UR)</th><th>Description (EN)</th><th>Description (UR)</th><th>Rs / hour</th><th>Rs / day</th><th>Min hrs</th><th>On</th></tr></thead>
+              <thead><tr><th>Pic</th><th>Service (EN)</th><th>Service (UR)</th><th>Description (EN)</th><th>Description (UR)</th><th>Rs / hour</th><th>Rs / day</th><th>Min hrs</th><th>On</th></tr></thead>
               <tbody>
                 {svcs.filter((s) => s.category_id === c.id).map((s) => (
                   <tr key={s.id}>
+                    <td><ImagePick url={s.image_url} folder="services" onChange={(u) => upd(s.id, { image_url: u })} size={44} /></td>
                     <td><input value={s.name_en} onChange={(e) => upd(s.id, { name_en: e.target.value })} /></td>
                     <td><input value={s.name_ur} dir="rtl" onChange={(e) => upd(s.id, { name_ur: e.target.value })} /></td>
                     <td><input value={s.description_en} onChange={(e) => upd(s.id, { description_en: e.target.value })} /></td>

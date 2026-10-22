@@ -50,7 +50,7 @@ export default function Home() {
             {!catalogReady && Array.from({ length: 8 }).map((_, i) => <div key={i} className="cat-card skeleton" />)}
             {categories.map((c) => (
               <Link key={c.id} to={firstService(c.id) ? `/book?service=${firstService(c.id)}` : "/services"} className="cat-card">
-                <span className="cat-icon">{c.icon}</span>
+                {c.image_url ? <img className="cat-img" src={c.image_url} alt="" loading="lazy" /> : <span className="cat-icon">{c.icon}</span>}
                 <b>{pick(c.name_en, c.name_ur)}</b>
                 {minRate(c.id) > 0 && <small>{t("from")} {rs(minRate(c.id))}{t("perHour")}</small>}
               </Link>

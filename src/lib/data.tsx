@@ -6,10 +6,10 @@ const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 export const supabase = createClient(url, key, { auth: { persistSession: true, autoRefreshToken: true } });
 
 // ---------------------------------------------------------------- types
-export type Category = { id: string; name_en: string; name_ur: string; icon: string; sort_order: number; is_active: boolean };
+export type Category = { id: string; name_en: string; name_ur: string; icon: string; image_url: string | null; sort_order: number; is_active: boolean };
 export type Service = {
   id: string; category_id: string; name_en: string; name_ur: string; description_en: string; description_ur: string;
-  hourly_rate: number; daily_rate: number; min_hours: number; sort_order: number; is_active: boolean;
+  hourly_rate: number; daily_rate: number; min_hours: number; sort_order: number; is_active: boolean; image_url: string | null;
 };
 export type Area = { id: string; name: string; sort_order: number; is_active: boolean };
 export type Settings = {
@@ -58,6 +58,16 @@ export const todayISO = () => {
   const d = new Date();
   return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 };
+
+export async function uploadImage(file: File, folder: string): Promise<string> {
+  if (!file.type.startsWith("image/")) throw new Error("Please choose an image file");
+  if (file.size > 5 * 1024 * 1024) throw new Error("Image must be under 5 MB");
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error } = await supabase.storage.from("media").upload(path, file, { contentType: file.type, upsert: false });
+  if (error) throw error;
+  return supabase.storage.from("media").getPublicUrl(path).data.publicUrl;
+}
 
 export async function callAuthHelper(body: Record<string, string>) {
   const { data: s } = await supabase.auth.getSession();
