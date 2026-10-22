@@ -27,7 +27,7 @@ jobs:
       - run: echo "ANDROID_HOME=$ANDROID_HOME" && ls $ANDROID_HOME
       - run: npm install
       - run: npx cap add android
-      - run: npx capacitor-assets generate --android --iconBackgroundColor '#0E7C61' --splashBackgroundColor '#0E7C61'
+      - run: npx capacitor-assets generate --android --iconBackgroundColor '#FFFFFF' --splashBackgroundColor '#FFFFFF'
       - run: npx cap sync android
       - name: Build APK
         working-directory: mobile/android

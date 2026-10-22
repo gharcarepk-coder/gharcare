@@ -1,5 +1,5 @@
 // GharCare service worker: app-shell caching, network-first for pages.
-const CACHE = "gharcare-v1";
+const CACHE = "gharcare-v2";
 const SHELL = ["/", "/manifest.webmanifest", "/icons/icon-192.png", "/icons/icon-512.png"];
 
 self.addEventListener("install", (e) => {

@@ -347,6 +347,13 @@ export function SettingsPage() {
     <div>
       <h1 className="admin-title">Settings</h1>
       <form className="panel form narrow" onSubmit={save}>
+        <div className="field">
+          <span>Logo (shown on website header & footer) — click to upload, then Save</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <ImagePick url={s.logo_url || "/brand-logo.webp"} folder="brand" onChange={(u) => setS({ ...s, logo_url: u })} size={120} />
+            {s.logo_url && <button type="button" className="link-btn" onClick={() => setS({ ...s, logo_url: null })}>Use default logo</button>}
+          </div>
+        </div>
         {f("town", "Town / city served (shown in footer)")}
         {f("phone", "Phone (+92…)")}
         {f("whatsapp", "WhatsApp (+92…)")}

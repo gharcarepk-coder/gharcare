@@ -14,7 +14,7 @@ export type Service = {
 export type Area = { id: string; name: string; sort_order: number; is_active: boolean };
 export type Settings = {
   id: number; business_name: string; town: string; phone: string; whatsapp: string; email: string;
-  hours_text: string; announcement_en: string; announcement_ur: string;
+  hours_text: string; announcement_en: string; announcement_ur: string; logo_url: string | null;
 };
 export type Profile = { id: string; full_name: string; phone: string | null; role: "customer" | "admin"; created_at: string };
 export type Staff = {
@@ -88,7 +88,7 @@ export async function callAuthHelper(body: Record<string, string>) {
 // ---------------------------------------------------------------- app context
 const DEFAULT_SETTINGS: Settings = {
   id: 1, business_name: "GharCare", town: "", phone: "+923259444057", whatsapp: "+923259444057",
-  email: "gharcarepk@gmail.com", hours_text: "8:00 AM – 8:00 PM, 7 days", announcement_en: "", announcement_ur: "",
+  email: "gharcarepk@gmail.com", hours_text: "8:00 AM – 8:00 PM, 7 days", announcement_en: "", announcement_ur: "", logo_url: null,
 };
 
 type AppCtx = {

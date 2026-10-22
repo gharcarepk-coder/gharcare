@@ -4,13 +4,10 @@ import { supabase, useApp, waLink, prettyPhone } from "../lib/data";
 import { useI18n } from "../lib/i18n";
 
 export function Logo({ light = false }: { light?: boolean }) {
+  const { settings } = useApp();
   return (
     <Link to="/" className={`logo ${light ? "logo-light" : ""}`} aria-label="GharCare home">
-      <img src="/icons/icon-192.png" alt="" width={36} height={36} />
-      <span className="logo-text">
-        <b>GharCare</b>
-        <small className="ur">گھر کیئر</small>
-      </span>
+      <img className="brand-logo" src={settings.logo_url || "/brand-logo.webp"} alt="GharCare گھر کیئر" />
     </Link>
   );
 }
