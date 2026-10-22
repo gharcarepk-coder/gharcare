@@ -354,6 +354,10 @@ export function SettingsPage() {
             {s.logo_url && <button type="button" className="link-btn" onClick={() => setS({ ...s, logo_url: null })}>Use default logo</button>}
           </div>
         </div>
+        <label className="toggle" style={{ fontSize: "1rem" }}>
+          <input type="checkbox" checked={!!s.show_prices} onChange={(e) => setS({ ...s, show_prices: e.target.checked })} />
+          Show prices on home & services pages (off = prices only appear on the booking form)
+        </label>
         {f("town", "Town / city served (shown in footer)")}
         {f("phone", "Phone (+92…)")}
         {f("whatsapp", "WhatsApp (+92…)")}

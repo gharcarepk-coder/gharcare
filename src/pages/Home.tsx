@@ -52,7 +52,7 @@ export default function Home() {
               <Link key={c.id} to={firstService(c.id) ? `/book?service=${firstService(c.id)}` : "/services"} className="cat-card">
                 {c.image_url ? <img className="cat-img" src={c.image_url} alt="" loading="lazy" /> : <span className="cat-icon">{c.icon}</span>}
                 <b>{pick(c.name_en, c.name_ur)}</b>
-                {minRate(c.id) > 0 && <small>{t("from")} {rs(minRate(c.id))}{t("perHour")}</small>}
+                {settings.show_prices && minRate(c.id) > 0 && <small>{t("from")} {rs(minRate(c.id))}{t("perHour")}</small>}
               </Link>
             ))}
           </div>

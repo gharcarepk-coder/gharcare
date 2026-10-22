@@ -4,7 +4,7 @@ import { useI18n } from "../lib/i18n";
 
 export default function Services() {
   const { t, pick } = useI18n();
-  const { categories, services, catalogReady } = useApp();
+  const { categories, services, catalogReady, settings } = useApp();
   return (
     <section className="section">
       <div className="container">
@@ -25,9 +25,9 @@ export default function Services() {
                       <p className="muted">{pick(s.description_en, s.description_ur)}</p>
                     </div>
                     <div className="svc-foot">
-                      <div className="rates">
+                      <div className="rates">{settings.show_prices && (<>
                         {s.hourly_rate > 0 && <span><b>{rs(s.hourly_rate)}</b>{t("perHour")}</span>}
-                        {s.daily_rate > 0 && <span><b>{rs(s.daily_rate)}</b>{t("perDay")}</span>}
+                        {s.daily_rate > 0 && <span><b>{rs(s.daily_rate)}</b>{t("perDay")}</span>}</>)}
                       </div>
                       <Link to={`/book?service=${s.id}`} className="btn btn-sm">{t("bookNow")}</Link>
                     </div>
