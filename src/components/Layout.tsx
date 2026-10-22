@@ -119,6 +119,7 @@ export default function Layout() {
             <p className="muted-light">{settings.hours_text}</p>
             <p><Link to="/services">{t("allServices")}</Link></p>
             <p><Link to="/book">{t("bookNow")}</Link></p>
+            <p><Link to="/app">📱 {t("installApp")}</Link></p>
           </div>
         </div>
         <div className="container footer-bottom">© {new Date().getFullYear()} GharCare. {t("rights")}</div>

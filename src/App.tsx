@@ -4,6 +4,7 @@ import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Services from "./pages/Services";
 import Book from "./pages/Book";
+import AppDownload from "./pages/AppDownload";
 import AuthPage from "./pages/Auth";
 import { Account, MyBookings, NotFound, RequireAuth } from "./pages/Customer";
 import AdminLayout from "./pages/admin/AdminLayout";
@@ -26,6 +27,7 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="services" element={<Services />} />
           <Route path="book" element={<Book />} />
+          <Route path="app" element={<AppDownload />} />
           <Route path="login" element={<AuthPage mode="login" />} />
           <Route path="signup" element={<AuthPage mode="signup" />} />
           <Route path="my-bookings" element={<RequireAuth><MyBookings /></RequireAuth>} />
