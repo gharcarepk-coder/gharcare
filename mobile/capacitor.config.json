@@ -3,7 +3,7 @@
   "appName": "GharCare",
   "webDir": "www",
   "server": {
-    "url": "https://gharcare.onrender.com",
+    "url": "https://gharcarepk.com",
     "cleartext": false,
     "androidScheme": "https"
   },
