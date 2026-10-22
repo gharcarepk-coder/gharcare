@@ -1,5 +1,5 @@
 // GharCare service worker: app-shell caching, network-first for pages.
-const CACHE = "gharcare-v2";
+const CACHE = "gharcare-v3";
 const SHELL = ["/", "/manifest.webmanifest", "/icons/icon-192.png", "/icons/icon-512.png"];
 
 self.addEventListener("install", (e) => {
@@ -18,7 +18,7 @@ self.addEventListener("fetch", (e) => {
   if (url.origin !== location.origin) return; // never cache Supabase API
   if (req.mode === "navigate") {
     e.respondWith(
-      fetch(req).then((res) => { caches.open(CACHE).then((c) => c.put("/", res.clone())); return res; })
+      fetch(req, { cache: "no-store" }).then((res) => { caches.open(CACHE).then((c) => c.put("/", res.clone())); return res; })
         .catch(() => caches.match("/")),
     );
     return;
