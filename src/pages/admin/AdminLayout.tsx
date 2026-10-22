@@ -6,6 +6,7 @@ const links = [
   ["/admin/bookings", "📋 Bookings"],
   ["/admin/staff", "👷 Staff"],
   ["/admin/services", "🛠️ Services & Rates"],
+  ["/admin/banners", "🖼️ Banners"],
   ["/admin/areas", "📍 Areas"],
   ["/admin/customers", "👥 Customers"],
   ["/admin/settings", "⚙️ Settings"],

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { rs, useApp, waLink } from "../lib/data";
 import { useI18n } from "../lib/i18n";
 import { WaIcon } from "../components/Layout";
+import BannerSlider from "../components/BannerSlider";
 
 export default function Home() {
   const { t, pick } = useI18n();
@@ -15,6 +16,7 @@ export default function Home() {
 
   return (
     <>
+      <BannerSlider />
       <section className="hero">
         <div className="container hero-grid">
           <div className="hero-copy">

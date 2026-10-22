@@ -315,3 +315,25 @@ html[dir="rtl"] .link-arrow { direction: rtl; }
 .footer .brand-logo { height: 96px; background: #fff; border-radius: 16px; padding: 8px; }
 .header-inner { height: 70px; }
 @media (max-width: 860px) { .nav { top: 70px; } .brand-logo { height: 46px; } }
+
+/* banners */
+.banners { position: relative; overflow: hidden; max-width: 1140px; margin: 16px auto 0; border-radius: 20px; width: calc(100% - 32px); box-shadow: var(--shadow); background: var(--g-soft); }
+.banner-track { display: flex; transition: transform .5s ease; }
+.banner-slide { flex: 0 0 100%; position: relative; }
+.banner-slide a { display: block; color: #fff; text-decoration: none !important; }
+.banner-slide img { width: 100%; aspect-ratio: 8 / 3; object-fit: cover; display: block; }
+.banner-text { position: absolute; inset: auto 0 0 0; padding: 28px 32px; background: linear-gradient(transparent, rgba(6,56,44,.85)); display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.banner-text h2 { margin: 0; color: #fff; font-size: clamp(1.2rem, 3.4vw, 2.2rem); }
+.banner-text p { margin: 0; opacity: .9; }
+.banner-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(255,255,255,.85); font-size: 1.6rem; cursor: pointer; color: var(--g-deep); display: grid; place-items: center; }
+.banner-nav.prev { inset-inline-start: 12px; } .banner-nav.next { inset-inline-end: 12px; }
+html[dir="rtl"] .banner-nav { transform: translateY(-50%) scaleX(-1); }
+.banner-dots { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; justify-content: center; gap: 6px; }
+.banner-dots button { width: 9px; height: 9px; border-radius: 50%; border: 0; background: rgba(255,255,255,.55); cursor: pointer; padding: 0; }
+.banner-dots button.on { background: #fff; width: 22px; border-radius: 6px; }
+@media (max-width: 600px) { .banner-slide img { aspect-ratio: 16 / 9; } .banner-text { padding: 16px 18px 26px; } .banner-nav { display: none; } .banners { border-radius: 14px; } }
+.banner-admin { display: flex; flex-direction: column; gap: 12px; }
+.banner-admin-item { display: grid; grid-template-columns: 320px 1fr; gap: 16px; align-items: start; }
+.banner-admin-item img { width: 100%; aspect-ratio: 8 / 3; object-fit: cover; border-radius: 10px; }
+.banner-admin-item.off { opacity: .6; }
+@media (max-width: 760px) { .banner-admin-item { grid-template-columns: 1fr; } }

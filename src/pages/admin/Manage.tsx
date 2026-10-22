@@ -371,3 +371,81 @@ export function SettingsPage() {
     </div>
   );
 }
+
+// ======================================================================= Banners
+type BannerRow = { id?: string; image_url: string; title_en: string; title_ur: string; subtitle_en: string; subtitle_ur: string; link: string; sort_order: number; is_active: boolean };
+
+export function BannersPage() {
+  const [rows, setRows] = useState<BannerRow[]>([]);
+  const [msg, setMsg] = useState("");
+  const load = () => supabase.from("banners").select("*").order("sort_order").then(({ data }) => setRows((data as BannerRow[]) || []));
+  useEffect(() => { load(); }, []);
+
+  const add = async (file?: File) => {
+    if (!file) return;
+    setMsg("Uploading…");
+    try {
+      const url = await uploadImage(file, "banners");
+      const { error } = await supabase.from("banners").insert({ image_url: url, sort_order: rows.length + 1 });
+      setMsg(error ? error.message : "Banner added ✓ — add a title if you like, then Save");
+      load();
+    } catch (e) { setMsg((e as Error).message); }
+  };
+  const upd = (n: number, patch: Partial<BannerRow>) => setRows((p) => p.map((r, k) => (k === n ? { ...r, ...patch } : r)));
+  const saveAll = async () => {
+    setMsg("Saving…");
+    for (const r of rows) {
+      const { id, ...rest } = r;
+      const { error } = await supabase.from("banners").update(rest).eq("id", id!);
+      if (error) { setMsg(error.message); return; }
+    }
+    setMsg("Saved ✓");
+  };
+  const remove = async (r: BannerRow) => {
+    if (!confirm("Delete this banner?")) return;
+    await supabase.from("banners").delete().eq("id", r.id!);
+    load();
+  };
+
+  return (
+    <div>
+      <div className="admin-head">
+        <div>
+          <h1 className="admin-title">Home banners</h1>
+          <p className="muted small">Wide images (best 1600 × 600). They slide automatically at the top of the home page.</p>
+        </div>
+        <div className="btn-row">
+          <label className="btn btn-ghost" style={{ cursor: "pointer" }}>+ Add banner<input type="file" accept="image/*" hidden onChange={(e) => add(e.target.files?.[0])} /></label>
+          <button className="btn" onClick={saveAll}>Save all changes</button>
+        </div>
+      </div>
+      {msg && <p className="ok">{msg}</p>}
+      {rows.length === 0 && <p className="muted">No banners yet. Click “+ Add banner”.</p>}
+      <div className="banner-admin">
+        {rows.map((r, n) => (
+          <div key={r.id} className={`panel banner-admin-item ${r.is_active ? "" : "off"}`}>
+            <img src={r.image_url} alt="" />
+            <div className="form">
+              <div className="row2">
+                <label className="field"><span>Title (English)</span><input value={r.title_en} onChange={(e) => upd(n, { title_en: e.target.value })} placeholder="e.g. Eid deep cleaning offer" /></label>
+                <label className="field"><span>Title (اردو)</span><input dir="rtl" value={r.title_ur} onChange={(e) => upd(n, { title_ur: e.target.value })} /></label>
+              </div>
+              <div className="row2">
+                <label className="field"><span>Subtitle (English)</span><input value={r.subtitle_en} onChange={(e) => upd(n, { subtitle_en: e.target.value })} /></label>
+                <label className="field"><span>Subtitle (اردو)</span><input dir="rtl" value={r.subtitle_ur} onChange={(e) => upd(n, { subtitle_ur: e.target.value })} /></label>
+              </div>
+              <div className="row2">
+                <label className="field"><span>Opens when clicked</span><input value={r.link} onChange={(e) => upd(n, { link: e.target.value })} placeholder="/book" /></label>
+                <label className="field"><span>Order</span><input type="number" value={r.sort_order} onChange={(e) => upd(n, { sort_order: Number(e.target.value) })} /></label>
+              </div>
+              <div className="btn-row">
+                <label className="toggle"><input type="checkbox" checked={r.is_active} onChange={(e) => upd(n, { is_active: e.target.checked })} /> Show on website</label>
+                <button className="link-btn danger" onClick={() => remove(r)}>Delete</button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

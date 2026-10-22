@@ -10,7 +10,7 @@ import { Account, MyBookings, NotFound, RequireAuth } from "./pages/Customer";
 import AdminLayout from "./pages/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import Bookings from "./pages/admin/Bookings";
-import { AreasPage, CustomersPage, ServicesPage, SettingsPage, StaffPage } from "./pages/admin/Manage";
+import { BannersPage, AreasPage, CustomersPage, ServicesPage, SettingsPage, StaffPage } from "./pages/admin/Manage";
 
 function ScrollTop() {
   const { pathname } = useLocation();
@@ -39,6 +39,7 @@ export default function App() {
           <Route path="bookings" element={<Bookings />} />
           <Route path="staff" element={<StaffPage />} />
           <Route path="services" element={<ServicesPage />} />
+          <Route path="banners" element={<BannersPage />} />
           <Route path="areas" element={<AreasPage />} />
           <Route path="customers" element={<CustomersPage />} />
           <Route path="settings" element={<SettingsPage />} />
