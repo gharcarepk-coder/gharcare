@@ -1,0 +1,13 @@
+{
+  "appId": "pk.gharcare.app",
+  "appName": "GharCare",
+  "webDir": "www",
+  "server": {
+    "url": "https://gharcare.onrender.com",
+    "cleartext": false,
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#0E7C61"
+  }
+}
