@@ -311,10 +311,10 @@ html[dir="rtl"] .link-arrow { direction: rtl; }
 .img-pick .img-x { position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; border-radius: 50%; border: 0; background: rgba(0,0,0,.6); color: #fff; font-size: 10px; line-height: 18px; padding: 0; cursor: pointer; z-index: 2; }
 
 /* brand logo */
-.brand-logo { height: 52px; width: auto; display: block; }
+.brand-logo { height: 64px; width: auto; display: block; }
 .footer .brand-logo { height: 96px; background: #fff; border-radius: 16px; padding: 8px; }
-.header-inner { height: 70px; }
-@media (max-width: 860px) { .nav { top: 70px; } .brand-logo { height: 46px; } }
+.header-inner { height: 80px; }
+@media (max-width: 860px) { .nav { top: 80px; } .brand-logo { height: 56px; } }
 
 /* banners */
 .banners { position: relative; overflow: hidden; max-width: 1140px; margin: 16px auto 0; border-radius: 20px; width: calc(100% - 32px); box-shadow: var(--shadow); background: var(--g-soft); }
