@@ -3,9 +3,13 @@
   "appName": "GharCare",
   "webDir": "www",
   "server": {
-    "url": "https://gharcarepk.com",
+    "url": "https://www.gharcarepk.com",
     "cleartext": false,
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "allowNavigation": [
+      "gharcarepk.com",
+      "www.gharcarepk.com"
+    ]
   },
   "android": {
     "backgroundColor": "#FFFFFF"
