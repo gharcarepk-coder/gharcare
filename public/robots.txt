@@ -1,3 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /account
+Disallow: /my-bookings
+
+Sitemap: https://gharcarepk.com/sitemap.xml
