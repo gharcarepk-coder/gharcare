@@ -204,7 +204,7 @@ export default function Book() {
               <div className="sum-total"><span>{t("total")}</span><b>{rs(total)}</b></div>
             </>
           ) : <p className="muted">{t("chooseService")}</p>}
-          <p className="muted small">💵 {t("payCash")}</p>
+          <p className="muted small">📱 {t("payCash")}</p>
         </aside>
       </div>
     </section>
