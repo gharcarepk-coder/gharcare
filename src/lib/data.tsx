@@ -19,7 +19,9 @@ export type Settings = {
 export type Profile = { id: string; full_name: string; phone: string | null; role: "customer" | "admin"; created_at: string };
 export type Staff = {
   id: string; full_name: string; phone: string; cnic: string | null; category_id: string | null; area_id: string | null;
-  daily_wage: number; status: "active" | "on_leave" | "inactive"; notes: string | null; joined_on: string; created_at: string;
+  daily_wage: number; status: "applied" | "active" | "on_leave" | "inactive" | "rejected"; notes: string | null; joined_on: string; created_at: string;
+  address: string | null; emergency_name: string | null; emergency_phone: string | null; wage_method: string | null;
+  cnic_verified: boolean; police_verified: boolean; experience: string | null; source: "admin" | "website";
 };
 export type BookingStatus = "pending" | "confirmed" | "assigned" | "in_progress" | "completed" | "cancelled";
 export type Booking = {

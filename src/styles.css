@@ -337,3 +337,5 @@ html[dir="rtl"] .banner-nav { transform: translateY(-50%) scaleX(-1); }
 .banner-admin-item img { width: 100%; aspect-ratio: 8 / 3; object-fit: cover; border-radius: 10px; }
 .banner-admin-item.off { opacity: .6; }
 @media (max-width: 760px) { .banner-admin-item { grid-template-columns: 1fr; } }
+.check { display: flex; align-items: center; gap: 8px; font-weight: 500; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--primary, #0E7C61); }

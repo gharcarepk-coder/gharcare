@@ -2,19 +2,38 @@ import { FormEvent, useEffect, useState } from "react";
 import { Area, callAuthHelper, uploadImage, Category, normalizePhone, prettyPhone, Profile, rs, Service, Settings, Staff, supabase, useApp, waLink } from "../../lib/data";
 
 // ======================================================================= Staff
-const emptyStaff = { full_name: "", phone: "", cnic: "", category_id: "", area_id: "", daily_wage: 0, status: "active", notes: "" };
+const emptyStaff = {
+  full_name: "", phone: "", cnic: "", category_id: "", area_id: "", daily_wage: 0, status: "active", notes: "",
+  address: "", emergency_name: "", emergency_phone: "", wage_method: "", cnic_verified: false, police_verified: false,
+  experience: "", joined_on: "",
+};
+const STAFF_TABS: [string, string][] = [
+  ["applied", "New applications"], ["active", "Active"], ["on_leave", "On leave"], ["inactive", "Inactive"], ["rejected", "Rejected"], ["all", "All"],
+];
+const statusPill = (s: string) => ({ active: "completed", on_leave: "pending", applied: "assigned", inactive: "cancelled", rejected: "cancelled" } as Record<string, string>)[s] || "pending";
+const todayLocal = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+
+function csvCell(v: unknown) {
+  const s = v === null || v === undefined ? "" : String(v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
 
 export function StaffPage() {
   const [rows, setRows] = useState<Staff[] | null>(null);
   const [cats, setCats] = useState<Category[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
-  const [edit, setEdit] = useState<(typeof emptyStaff & { id?: string }) | null>(null);
+  const [edit, setEdit] = useState<(typeof emptyStaff & { id?: string; source?: string }) | null>(null);
   const [filter, setFilter] = useState("active");
+  const [q, setQ] = useState("");
   const [msg, setMsg] = useState("");
 
-  const load = () => supabase.from("staff").select("*").order("full_name").then(({ data }) => setRows((data as Staff[]) || []));
+  const load = () => supabase.from("staff").select("*").order("created_at", { ascending: false }).then(({ data }) => {
+    const list = (data as Staff[]) || [];
+    setRows(list);
+    return list;
+  });
   useEffect(() => {
-    load();
+    load().then((list) => { if (list.some((s) => s.status === "applied")) setFilter("applied"); });
     supabase.from("categories").select("*").order("sort_order").then(({ data }) => setCats((data as Category[]) || []));
     supabase.from("areas").select("*").order("name").then(({ data }) => setAreas((data as Area[]) || []));
   }, []);
@@ -24,10 +43,15 @@ export function StaffPage() {
     if (!edit) return;
     const p = normalizePhone(edit.phone);
     if (!edit.full_name.trim() || !p) { setMsg("Name and valid mobile number required."); return; }
+    const ep = edit.emergency_phone ? normalizePhone(edit.emergency_phone) : null;
+    if (edit.emergency_phone && !ep) { setMsg("Emergency mobile number is not valid."); return; }
     const row = {
       full_name: edit.full_name.trim(), phone: "+" + p, cnic: edit.cnic || null,
       category_id: edit.category_id || null, area_id: edit.area_id || null,
       daily_wage: Number(edit.daily_wage) || 0, status: edit.status, notes: edit.notes || null,
+      address: edit.address || null, emergency_name: edit.emergency_name || null, emergency_phone: ep ? "+" + ep : null,
+      wage_method: edit.wage_method || null, cnic_verified: edit.cnic_verified, police_verified: edit.police_verified,
+      experience: edit.experience || null, joined_on: edit.joined_on || todayLocal(),
     };
     const { error } = edit.id
       ? await supabase.from("staff").update(row).eq("id", edit.id)
@@ -36,35 +60,86 @@ export function StaffPage() {
     setEdit(null); setMsg(""); load();
   };
 
+  const setStatus = async (s: Staff, status: string) => {
+    const patch: Record<string, unknown> = { status };
+    if (s.status === "applied" && status === "active") patch.joined_on = todayLocal();
+    const { error } = await supabase.from("staff").update(patch).eq("id", s.id);
+    if (error) { alert(error.message); return; }
+    load();
+  };
+
   const catName = (id: string | null) => cats.find((c) => c.id === id);
-  const shown = rows?.filter((s) => filter === "all" || s.status === filter);
+  const areaName = (id: string | null) => areas.find((a) => a.id === id)?.name || "";
+  const count = (st: string) => rows?.filter((s) => st === "all" || s.status === st).length ?? 0;
+  const needle = q.trim().toLowerCase();
+  const shown = rows?.filter((s) => (filter === "all" || s.status === filter) &&
+    (!needle || [s.full_name, s.phone, s.cnic, s.address].some((v) => (v || "").toLowerCase().includes(needle))));
+
+  const exportCsv = () => {
+    if (!rows) return;
+    const head = ["Name", "Mobile", "CNIC", "Skill", "Area", "Address", "Experience", "Emergency contact", "Emergency mobile",
+      "Daily wage (Rs)", "Wage paid by", "Status", "Joining date", "CNIC verified", "Police verification", "Source", "Notes", "Added on"];
+    const lines = (shown || []).map((s) => [s.full_name, prettyPhone(s.phone), s.cnic, catName(s.category_id)?.name_en, areaName(s.area_id),
+      s.address, s.experience, s.emergency_name, s.emergency_phone ? prettyPhone(s.emergency_phone) : "", s.daily_wage, s.wage_method,
+      s.status.replace("_", " "), s.joined_on, s.cnic_verified ? "Yes" : "No", s.police_verified ? "Yes" : "No", s.source, s.notes,
+      s.created_at.slice(0, 10)].map(csvCell).join(","));
+    const blob = new Blob(["﻿" + [head.join(","), ...lines].join("\n")], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `gharcare-staff-${todayLocal()}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  const openEdit = (s: Staff) => setEdit({
+    ...emptyStaff, ...s, phone: prettyPhone(s.phone), cnic: s.cnic || "", category_id: s.category_id || "", area_id: s.area_id || "",
+    notes: s.notes || "", address: s.address || "", emergency_name: s.emergency_name || "",
+    emergency_phone: s.emergency_phone ? prettyPhone(s.emergency_phone) : "", wage_method: s.wage_method || "",
+    experience: s.experience || "", joined_on: s.joined_on || "",
+  });
 
   return (
     <div>
       <div className="admin-head">
         <h1 className="admin-title">Staff (own manpower)</h1>
-        <button className="btn" onClick={() => setEdit({ ...emptyStaff })}>+ Add worker</button>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button className="btn btn-ghost" onClick={exportCsv} disabled={!shown?.length}>⬇ Download Excel (CSV)</button>
+          <button className="btn" onClick={() => setEdit({ ...emptyStaff, joined_on: todayLocal() })}>+ Add worker</button>
+        </div>
       </div>
+      <p className="muted small">New workers who apply on the website (gharcarepk.com/join) appear under <b>New applications</b>. Approve them to move them into Active staff.</p>
       <div className="chips">
-        {["active", "on_leave", "inactive", "all"].map((s) => <button key={s} className={`chip ${filter === s ? "on" : ""}`} onClick={() => setFilter(s)}>{s.replace("_", " ")}</button>)}
+        {STAFF_TABS.map(([s, label]) => (
+          <button key={s} className={`chip ${filter === s ? "on" : ""}`} onClick={() => setFilter(s)}>
+            {label}{rows ? ` (${count(s)})` : ""}
+          </button>
+        ))}
       </div>
+      <input className="search" placeholder="Search name, mobile, CNIC or address" value={q} onChange={(e) => setQ(e.target.value)} style={{ maxWidth: 360, marginBottom: 12 }} />
       {shown === undefined && <div className="spinner" />}
-      {shown?.length === 0 && <p className="muted">No workers yet. Add your first worker.</p>}
+      {shown?.length === 0 && <p className="muted">{filter === "applied" ? "No new applications. Share gharcarepk.com/join with people who want to work with GharCare." : "No workers here yet."}</p>}
       <div className="table-wrap">
         {shown && shown.length > 0 && (
           <table className="table">
-            <thead><tr><th>Name</th><th>Skill</th><th>Mobile</th><th>CNIC</th><th>Area</th><th>Daily wage</th><th>Status</th><th></th></tr></thead>
+            <thead><tr><th>Name</th><th>Skill</th><th>Mobile</th><th>CNIC</th><th>Area</th><th>Daily wage</th><th>Checks</th><th>Status</th><th></th></tr></thead>
             <tbody>
               {shown.map((s) => (
                 <tr key={s.id}>
-                  <td><b>{s.full_name}</b></td>
+                  <td><b>{s.full_name}</b>{s.source === "website" && <><br /><small className="muted">Applied {s.created_at.slice(0, 10)}</small></>}</td>
                   <td>{catName(s.category_id)?.icon} {catName(s.category_id)?.name_en}</td>
                   <td><a href={`tel:${s.phone}`}>{prettyPhone(s.phone)}</a> · <a href={waLink(s.phone)} target="_blank" rel="noreferrer">WA</a></td>
                   <td>{s.cnic}</td>
-                  <td>{areas.find((a) => a.id === s.area_id)?.name}</td>
-                  <td>{rs(s.daily_wage)}</td>
-                  <td><em className={`pill pill-${s.status === "active" ? "completed" : s.status === "on_leave" ? "pending" : "cancelled"}`}>{s.status.replace("_", " ")}</em></td>
-                  <td><button className="link-btn" onClick={() => setEdit({ ...emptyStaff, ...s, phone: prettyPhone(s.phone), cnic: s.cnic || "", category_id: s.category_id || "", area_id: s.area_id || "", notes: s.notes || "" })}>Edit</button></td>
+                  <td>{areaName(s.area_id)}</td>
+                  <td>{s.daily_wage ? rs(s.daily_wage) : "—"}</td>
+                  <td><small>{s.cnic_verified ? "✅" : "⬜"} CNIC<br />{s.police_verified ? "✅" : "⬜"} Police</small></td>
+                  <td><em className={`pill pill-${statusPill(s.status)}`}>{s.status === "applied" ? "new" : s.status.replace("_", " ")}</em></td>
+                  <td style={{ whiteSpace: "nowrap" }}>
+                    {s.status === "applied" && <>
+                      <button className="link-btn" onClick={() => setStatus(s, "active")}>Approve</button>{" · "}
+                      <button className="link-btn" onClick={() => setStatus(s, "rejected")}>Reject</button>{" · "}
+                    </>}
+                    <button className="link-btn" onClick={() => openEdit(s)}>{s.status === "applied" ? "View" : "Edit"}</button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -75,23 +150,45 @@ export function StaffPage() {
       {edit && (
         <div className="drawer-backdrop" onClick={() => setEdit(null)}>
           <form className="drawer form" onClick={(e) => e.stopPropagation()} onSubmit={save}>
-            <div className="drawer-head"><h2>{edit.id ? "Edit worker" : "Add worker"}</h2><button type="button" className="icon-btn" onClick={() => setEdit(null)}>✕</button></div>
+            <div className="drawer-head"><h2>{edit.id ? (edit.status === "applied" ? "Application" : "Edit worker") : "Add worker"}</h2><button type="button" className="icon-btn" onClick={() => setEdit(null)}>✕</button></div>
             <label className="field"><span>Full name</span><input value={edit.full_name} onChange={(e) => setEdit({ ...edit, full_name: e.target.value })} required /></label>
-            <label className="field"><span>Mobile</span><input value={edit.phone} onChange={(e) => setEdit({ ...edit, phone: e.target.value })} placeholder="0300 1234567" inputMode="tel" required /></label>
-            <label className="field"><span>CNIC</span><input value={edit.cnic} onChange={(e) => setEdit({ ...edit, cnic: e.target.value })} placeholder="35202-1234567-1" /></label>
-            <label className="field"><span>Skill</span>
-              <select value={edit.category_id} onChange={(e) => setEdit({ ...edit, category_id: e.target.value })}>
-                <option value="">—</option>{cats.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name_en}</option>)}
-              </select></label>
-            <label className="field"><span>Area</span>
-              <select value={edit.area_id} onChange={(e) => setEdit({ ...edit, area_id: e.target.value })}>
-                <option value="">—</option>{areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-              </select></label>
-            <label className="field"><span>Daily wage paid to worker (Rs)</span><input type="number" value={edit.daily_wage} onChange={(e) => setEdit({ ...edit, daily_wage: Number(e.target.value) })} /></label>
-            <label className="field"><span>Status</span>
-              <select value={edit.status} onChange={(e) => setEdit({ ...edit, status: e.target.value })}>
-                <option value="active">Active</option><option value="on_leave">On leave</option><option value="inactive">Inactive</option>
-              </select></label>
+            <div className="row2">
+              <label className="field"><span>Mobile</span><input value={edit.phone} onChange={(e) => setEdit({ ...edit, phone: e.target.value })} placeholder="0300 1234567" inputMode="tel" required /></label>
+              <label className="field"><span>CNIC</span><input value={edit.cnic} onChange={(e) => setEdit({ ...edit, cnic: e.target.value })} placeholder="35202-1234567-1" /></label>
+            </div>
+            <div className="row2">
+              <label className="field"><span>Skill</span>
+                <select value={edit.category_id} onChange={(e) => setEdit({ ...edit, category_id: e.target.value })}>
+                  <option value="">—</option>{cats.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name_en}</option>)}
+                </select></label>
+              <label className="field"><span>Area</span>
+                <select value={edit.area_id} onChange={(e) => setEdit({ ...edit, area_id: e.target.value })}>
+                  <option value="">—</option>{areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+                </select></label>
+            </div>
+            <label className="field"><span>Home address</span><textarea rows={2} value={edit.address} onChange={(e) => setEdit({ ...edit, address: e.target.value })} /></label>
+            <label className="field"><span>Experience</span><textarea rows={2} value={edit.experience} onChange={(e) => setEdit({ ...edit, experience: e.target.value })} /></label>
+            <div className="row2">
+              <label className="field"><span>Emergency contact</span><input value={edit.emergency_name} onChange={(e) => setEdit({ ...edit, emergency_name: e.target.value })} /></label>
+              <label className="field"><span>Emergency mobile</span><input value={edit.emergency_phone} onChange={(e) => setEdit({ ...edit, emergency_phone: e.target.value })} placeholder="0300 1234567" inputMode="tel" /></label>
+            </div>
+            <div className="row2">
+              <label className="field"><span>Daily wage paid to worker (Rs)</span><input type="number" min={0} value={edit.daily_wage} onChange={(e) => setEdit({ ...edit, daily_wage: Number(e.target.value) })} /></label>
+              <label className="field"><span>Wage paid by</span>
+                <select value={edit.wage_method} onChange={(e) => setEdit({ ...edit, wage_method: e.target.value })}>
+                  <option value="">—</option><option value="jazzcash">JazzCash</option><option value="easypaisa">Easypaisa</option><option value="bank">Bank</option><option value="cash">Cash</option>
+                </select></label>
+            </div>
+            <div className="row2">
+              <label className="field"><span>Status</span>
+                <select value={edit.status} onChange={(e) => setEdit({ ...edit, status: e.target.value })}>
+                  <option value="applied">New application</option><option value="active">Active</option><option value="on_leave">On leave</option>
+                  <option value="inactive">Inactive</option><option value="rejected">Rejected</option>
+                </select></label>
+              <label className="field"><span>Joining date</span><input type="date" value={edit.joined_on} onChange={(e) => setEdit({ ...edit, joined_on: e.target.value })} /></label>
+            </div>
+            <label className="check"><input type="checkbox" checked={edit.cnic_verified} onChange={(e) => setEdit({ ...edit, cnic_verified: e.target.checked })} /> CNIC verified</label>
+            <label className="check"><input type="checkbox" checked={edit.police_verified} onChange={(e) => setEdit({ ...edit, police_verified: e.target.checked })} /> Police verification done</label>
             <label className="field"><span>Notes</span><textarea rows={2} value={edit.notes} onChange={(e) => setEdit({ ...edit, notes: e.target.value })} /></label>
             {msg && <p className="error">{msg}</p>}
             <button className="btn btn-block">Save</button>

@@ -117,6 +117,7 @@ export default function Layout() {
             <p><Link to="/services">{t("allServices")}</Link></p>
             <p><Link to="/book">{t("bookNow")}</Link></p>
             <p><Link to="/app">📱 {t("installApp")}</Link></p>
+            <p><Link to="/join">🧰 {pick("Work with GharCare", "گھر کیئر کے ساتھ کام کریں")}</Link></p>
           </div>
         </div>
         <div className="container footer-bottom">© {new Date().getFullYear()} GharCare. {t("rights")}</div>
