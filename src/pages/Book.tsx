@@ -205,6 +205,7 @@ export default function Book() {
             </>
           ) : <p className="muted">{t("chooseService")}</p>}
           <p className="muted small">📱 {t("payCash")}</p>
+          <p className="note-box small">🧰 {t("materialsNote")}</p>
         </aside>
       </div>
     </section>
