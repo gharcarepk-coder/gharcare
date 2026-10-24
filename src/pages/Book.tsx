@@ -52,7 +52,11 @@ export default function Book() {
   }, [svc?.id, d.type]);
 
   const rate = svc ? (d.type === "hourly" ? svc.hourly_rate : svc.daily_rate) : 0;
-  const total = Math.round(rate * d.qty * d.workers);
+  const labour = Math.round(rate * d.qty * d.workers);
+  const areaObj = areas.find((a) => a.id === d.areaId);
+  const trips = d.type === "daily" ? Math.ceil(d.qty) : 1;
+  const travel = areaObj ? Math.round((areaObj.travel_charge || 0) * d.workers * trips) : 0;
+  const total = labour + travel;
   const grouped = useMemo(
     () => categories.map((c) => ({ c, list: services.filter((s) => s.category_id === c.id) })).filter((g) => g.list.length),
     [categories, services],
@@ -200,11 +204,13 @@ export default function Book() {
             <>
               <p className="summary-svc">{pick(svc.name_en, svc.name_ur)}</p>
               <div className="sum-row"><span>{rs(rate)} × {d.qty} {d.type === "hourly" ? t("hours") : t("days")}</span></div>
-              <div className="sum-row"><span>× {d.workers} {t("workers")}</span></div>
+              <div className="sum-row"><span>× {d.workers} {t("workers")}</span><b>{rs(labour)}</b></div>
+              <div className="sum-row"><span>🛵 {t("travelLine")}{areaObj ? ` · ${rs(areaObj.travel_charge)} × ${d.workers}${trips > 1 ? ` × ${trips}` : ""}` : ""}</span><b>{areaObj ? rs(travel) : "—"}</b></div>
               <div className="sum-total"><span>{t("total")}</span><b>{rs(total)}</b></div>
             </>
           ) : <p className="muted">{t("chooseService")}</p>}
           <p className="muted small">📱 {t("payCash")}</p>
+          <p className="muted small">🛵 {t("travelNote")}</p>
           <p className="note-box small">🧰 {t("materialsNote")}</p>
         </aside>
       </div>

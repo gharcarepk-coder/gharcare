@@ -9,7 +9,7 @@ export default function Services() {
     <section className="section">
       <div className="container">
         <h1 className="page-title">{t("ourServices")}</h1>
-        <p className="note-box">🧰 {t("materialsNote")}</p>
+        <p className="note-box">🧰 {t("materialsNote")}<br />🛵 {t("travelNote")}</p>
         {!catalogReady && <div className="svc-card skeleton" style={{ height: 120 }} />}
         {categories.map((c) => {
           const list = services.filter((s) => s.category_id === c.id);

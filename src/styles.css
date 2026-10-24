@@ -176,7 +176,8 @@ html[dir="rtl"] .link-arrow { direction: rtl; }
 .book-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
 .summary { position: sticky; top: 84px; }
 .summary-svc { font-weight: 700; font-size: 1.1rem; }
-.sum-row { color: var(--muted); padding: 4px 0; }
+.sum-row { color: var(--muted); padding: 4px 0; display: flex; justify-content: space-between; gap: 12px; }
+.sum-row b { color: var(--text, inherit); font-weight: 600; white-space: nowrap; }
 .sum-total { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px; }
 .sum-total b { font-size: 1.6rem; color: var(--g-dark); }
 .mobile-total { display: none; }

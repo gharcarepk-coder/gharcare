@@ -11,7 +11,7 @@ export type Service = {
   id: string; category_id: string; name_en: string; name_ur: string; description_en: string; description_ur: string;
   hourly_rate: number; daily_rate: number; min_hours: number; sort_order: number; is_active: boolean; image_url: string | null;
 };
-export type Area = { id: string; name: string; sort_order: number; is_active: boolean };
+export type Area = { id: string; name: string; sort_order: number; is_active: boolean; travel_charge: number };
 export type Settings = {
   id: number; business_name: string; town: string; phone: string; whatsapp: string; email: string;
   hours_text: string; announcement_en: string; announcement_ur: string; logo_url: string | null; show_prices: boolean;
@@ -27,7 +27,7 @@ export type BookingStatus = "pending" | "confirmed" | "assigned" | "in_progress"
 export type Booking = {
   id: string; ref_no: number; customer_id: string; customer_name: string; customer_phone: string; service_id: string;
   area_id: string | null; address: string; booking_type: "hourly" | "daily"; work_date: string; start_time: string;
-  quantity: number; workers: number; rate: number; est_total: number; notes: string | null; status: BookingStatus;
+  quantity: number; workers: number; rate: number; est_total: number; travel_charge: number; notes: string | null; status: BookingStatus;
   staff_id: string | null; final_amount: number | null; admin_notes: string | null; created_at: string; updated_at: string;
 };
 export const STATUSES: BookingStatus[] = ["pending", "confirmed", "assigned", "in_progress", "completed", "cancelled"];

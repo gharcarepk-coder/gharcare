@@ -137,7 +137,7 @@ function BookingDrawer({ b, service, area, staff, onClose, onSaved }: {
           <dt>Service</dt><dd>{service?.name_en}</dd>
           <dt>When</dt><dd>{fmtDate(b.work_date)} · {fmtTime(b.start_time)}</dd>
           <dt>Duration</dt><dd>{b.quantity} {b.booking_type === "hourly" ? "hours" : "days"} × {b.workers} worker(s)</dd>
-          <dt>Estimate</dt><dd>{rs(b.rate)} × {b.quantity} × {b.workers} = <b>{rs(b.est_total)}</b></dd>
+          <dt>Estimate</dt><dd>{rs(b.rate)} × {b.quantity} × {b.workers}{b.travel_charge ? <> + pick &amp; drop {rs(b.travel_charge)}</> : null} = <b>{rs(b.est_total)}</b></dd>
           <dt>Customer</dt><dd>{b.customer_name} · <a href={`tel:${b.customer_phone}`}>{prettyPhone(b.customer_phone)}</a></dd>
           <dt>Address</dt><dd>{b.address}{area && `, ${area}`}</dd>
           {b.notes && (<><dt>Customer notes</dt><dd>{b.notes}</dd></>)}

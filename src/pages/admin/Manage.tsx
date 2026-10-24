@@ -323,6 +323,10 @@ export function AreasPage() {
     setName(""); load(); refreshCatalog();
   };
   const toggle = async (a: Area) => { await supabase.from("areas").update({ is_active: !a.is_active }).eq("id", a.id); load(); refreshCatalog(); };
+  const setCharge = async (a: Area, v: string) => {
+    const n = Math.max(0, Math.round(Number(v) || 0));
+    if (n !== a.travel_charge) { await supabase.from("areas").update({ travel_charge: n }).eq("id", a.id); load(); refreshCatalog(); }
+  };
   const rename = async (a: Area, n: string) => { if (n.trim() && n !== a.name) { await supabase.from("areas").update({ name: n.trim() }).eq("id", a.id); load(); refreshCatalog(); } };
   const remove = async (a: Area) => {
     if (!confirm(`Delete area "${a.name}"?`)) return;
@@ -333,7 +337,7 @@ export function AreasPage() {
   return (
     <div>
       <h1 className="admin-title">Service areas</h1>
-      <p className="muted">Areas / sectors / mohallas in your town that customers can pick when booking.</p>
+      <p className="muted">Areas / sectors / mohallas in your town that customers can pick when booking. <b>Pick &amp; drop</b> is the worker travel charge for that area, added per worker for each working day.</p>
       <form className="toolbar" onSubmit={add}>
         <input className="search" value={name} onChange={(e) => setName(e.target.value)} placeholder="New area name, e.g. Model Town" />
         <button className="btn">Add area</button>
@@ -342,6 +346,9 @@ export function AreasPage() {
         {rows.map((a) => (
           <div key={a.id} className={`area-item ${a.is_active ? "" : "off"}`}>
             <input defaultValue={a.name} onBlur={(e) => rename(a, e.target.value)} />
+            <label className="toggle" title="Pick & drop charge per worker per day">🛵 Rs
+              <input type="number" min={0} step={50} defaultValue={a.travel_charge} onBlur={(e) => setCharge(a, e.target.value)} style={{ width: 90, flex: "none" }} aria-label={`Pick and drop charge for ${a.name}`} />
+            </label>
             <label className="toggle"><input type="checkbox" checked={a.is_active} onChange={() => toggle(a)} /> Active</label>
             <button className="link-btn danger" onClick={() => remove(a)}>Delete</button>
           </div>
