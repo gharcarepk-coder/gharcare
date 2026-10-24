@@ -116,13 +116,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setProfile((data as Profile) ?? null);
   }, []);
 
-  const refreshCatalog = useCallback(async () => {
+  const refreshCatalog = useCallback(async (retried = false): Promise<void> => {
     const [c, s, a, st] = await Promise.all([
       supabase.from("categories").select("*").eq("is_active", true).order("sort_order"),
       supabase.from("services").select("*").eq("is_active", true).order("sort_order"),
       supabase.from("areas").select("*").eq("is_active", true).order("sort_order").order("name"),
       supabase.from("settings").select("*").eq("id", 1).maybeSingle(),
     ]);
+    // A stale login (e.g. the device clock is wrong, so the token never auto-refreshes)
+    // makes every request fail with 401. Renew it, or drop it, and try once more.
+    if (!retried && [c, s, a, st].some((r) => r.status === 401)) {
+      const { error } = await supabase.auth.refreshSession();
+      if (error) await supabase.auth.signOut({ scope: "local" });
+      return refreshCatalog(true);
+    }
     if (c.data) setCategories(c.data as Category[]);
     if (s.data) setServices(s.data as Service[]);
     if (a.data) setAreas(a.data as Area[]);
