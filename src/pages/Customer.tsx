@@ -37,10 +37,10 @@ export function MyBookings() {
       <div className="container narrow-wide">
         <div className="section-head">
           <h1 className="page-title">{t("myBookings")}</h1>
-          <Link to="/book" className="btn btn-sm">{t("bookNow")}</Link>
+          <Link to="/book/" className="btn btn-sm">{t("bookNow")}</Link>
         </div>
         {rows === null && <div className="spinner" />}
-        {rows?.length === 0 && <div className="card center"><p className="muted">{t("noBookings")}</p><Link to="/book" className="btn">{t("bookNow")}</Link></div>}
+        {rows?.length === 0 && <div className="card center"><p className="muted">{t("noBookings")}</p><Link to="/book/" className="btn">{t("bookNow")}</Link></div>}
         <div className="booking-list">
           {rows?.map((b) => (
             <article key={b.id} className="card booking-card">

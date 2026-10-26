@@ -74,7 +74,7 @@ export default function Layout() {
         <div className="container header-inner">
           <Logo />
           <nav className={`nav ${open ? "nav-open" : ""}`} onClick={() => setOpen(false)}>
-            <NavLink to="/services">{t("ourServices")}</NavLink>
+            <NavLink to="/services/">{t("ourServices")}</NavLink>
             {session && <NavLink to="/my-bookings">{t("myBookings")}</NavLink>}
             {profile?.role === "admin" && <NavLink to="/admin">{t("admin")}</NavLink>}
             {session ? (
@@ -85,7 +85,7 @@ export default function Layout() {
             ) : (
               <NavLink to="/login">{t("login")}</NavLink>
             )}
-            <Link to="/book" className="btn btn-sm nav-cta">{t("bookNow")}</Link>
+            <Link to="/book/" className="btn btn-sm nav-cta">{t("bookNow")}</Link>
           </nav>
           <div className="header-tools">
             <button className="lang-btn" onClick={() => setLang(lang === "en" ? "ur" : "en")}>{t("language")}</button>
@@ -114,10 +114,10 @@ export default function Layout() {
           <div>
             <h4>{t("hoursLabel")}</h4>
             <p className="muted-light">{settings.hours_text}</p>
-            <p><Link to="/services">{t("allServices")}</Link></p>
-            <p><Link to="/book">{t("bookNow")}</Link></p>
-            <p><Link to="/app">📱 {t("installApp")}</Link></p>
-            <p><Link to="/join">🧰 {pick("Work with GharCare", "گھر کیئر کے ساتھ کام کریں")}</Link></p>
+            <p><Link to="/services/">{t("allServices")}</Link></p>
+            <p><Link to="/book/">{t("bookNow")}</Link></p>
+            <p><Link to="/app/">📱 {t("installApp")}</Link></p>
+            <p><Link to="/join/">🧰 {pick("Work with GharCare", "گھر کیئر کے ساتھ کام کریں")}</Link></p>
           </div>
         </div>
         <div className="container footer-bottom">© {new Date().getFullYear()} GharCare. {t("rights")}</div>

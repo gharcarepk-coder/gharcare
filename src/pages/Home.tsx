@@ -24,7 +24,7 @@ export default function Home() {
             <h1>{t("heroTitle")}</h1>
             <p className="lead">{t("heroSub")}</p>
             <div className="hero-actions">
-              <Link to="/book" className="btn btn-lg">{t("bookNow")}</Link>
+              <Link to="/book/" className="btn btn-lg">{t("bookNow")}</Link>
               <a href={waLink(settings.whatsapp, "Assalam o Alaikum GharCare, I need a worker.")} target="_blank" rel="noreferrer" className="btn btn-lg btn-ghost">
                 <WaIcon /> {t("whatsappUs")}
               </a>
@@ -46,7 +46,7 @@ export default function Home() {
         <div className="container">
           <div className="section-head">
             <h2>{t("ourServices")}</h2>
-            <Link to="/services" className="link-arrow">{t("allServices")} →</Link>
+            <Link to="/services/" className="link-arrow">{t("allServices")} →</Link>
           </div>
           <div className="cat-grid">
             {!catalogReady && Array.from({ length: 8 }).map((_, i) => <div key={i} className="cat-card skeleton" />)}
@@ -98,7 +98,7 @@ export default function Home() {
             <p>{t("ctaSub")}</p>
           </div>
           <div className="hero-actions">
-            <Link to="/book" className="btn btn-lg btn-light">{t("bookNow")}</Link>
+            <Link to="/book/" className="btn btn-lg btn-light">{t("bookNow")}</Link>
             <a href={`tel:${settings.phone}`} className="btn btn-lg btn-outline-light">📞 {settings.phone}</a>
           </div>
         </div>

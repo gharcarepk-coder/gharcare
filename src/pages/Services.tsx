@@ -30,7 +30,7 @@ export default function Services() {
                         {s.hourly_rate > 0 && <span><b>{rs(s.hourly_rate)}</b>{t("perHour")}</span>}
                         {s.daily_rate > 0 && <span><b>{rs(s.daily_rate)}</b>{t("perDay")}</span>}</>)}
                       </div>
-                      <Link to={`/book?service=${s.id}`} className="btn btn-sm">{t("bookNow")}</Link>
+                      <Link to={`/book/?service=${s.id}`} className="btn btn-sm">{t("bookNow")}</Link>
                     </div>
                   </div>
                 ))}

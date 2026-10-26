@@ -34,8 +34,11 @@ export const PAGES: Record<string, PageSeo> = {
 
 export const NOINDEX: PageSeo = { title: "GharCare", description: PAGES["/"].description, index: false };
 
+export const canonicalUrl = (path: string) => SITE + (path === "/" ? "/" : `${path}/`);
+
 export function seoFor(pathname: string): PageSeo & { canonical: string } {
   const path = pathname.replace(/\/+$/, "") || "/";
   const page = PAGES[path] ?? NOINDEX;
-  return { ...page, canonical: SITE + (path === "/" ? "/" : path) };
+  // Static page files live at /<page>/index.html, which the host serves at "/<page>/".
+  return { ...page, canonical: canonicalUrl(path) };
 }

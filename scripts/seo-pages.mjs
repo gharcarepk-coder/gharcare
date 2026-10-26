@@ -11,7 +11,7 @@ const src = fs.readFileSync(path.join(root, "src/lib/seo.ts"), "utf8");
 const js = ts.transpileModule(src, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 } }).outputText;
 const tmp = path.join(root, "dist", ".seo-tmp.mjs");
 fs.writeFileSync(tmp, js);
-const { PAGES, SITE } = await import(pathToFileURL(tmp).href);
+const { PAGES, canonicalUrl } = await import(pathToFileURL(tmp).href);
 fs.unlinkSync(tmp);
 
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
@@ -21,7 +21,7 @@ const urls = [];
 
 for (const [route, p] of Object.entries(PAGES)) {
   if (!p.index) continue;
-  const canonical = SITE + (route === "/" ? "/" : route);
+  const canonical = canonicalUrl(route);
   urls.push(canonical);
   let html = base
     .replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(p.title)}</title>`)
