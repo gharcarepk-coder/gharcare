@@ -4,4 +4,4 @@ Disallow: /admin
 Disallow: /account
 Disallow: /my-bookings
 
-Sitemap: https://gharcarepk.com/sitemap.xml
+Sitemap: https://www.gharcarepk.com/sitemap.xml

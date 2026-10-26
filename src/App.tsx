@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import Layout from "./components/Layout";
+import Seo from "./components/Seo";
 import Home from "./pages/Home";
 import Services from "./pages/Services";
 import Book from "./pages/Book";
@@ -22,6 +23,7 @@ function ScrollTop() {
 export default function App() {
   return (
     <BrowserRouter>
+      <Seo />
       <ScrollTop />
       <Routes>
         <Route element={<Layout />}>
