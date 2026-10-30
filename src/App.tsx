@@ -7,6 +7,7 @@ import Services from "./pages/Services";
 import Book from "./pages/Book";
 import AppDownload from "./pages/AppDownload";
 import Join from "./pages/Join";
+import { DeleteAccount, Privacy } from "./pages/Legal";
 import AuthPage from "./pages/Auth";
 import { Account, MyBookings, NotFound, RequireAuth } from "./pages/Customer";
 import AdminLayout from "./pages/admin/AdminLayout";
@@ -32,6 +33,8 @@ export default function App() {
           <Route path="book" element={<Book />} />
           <Route path="app" element={<AppDownload />} />
           <Route path="join" element={<Join />} />
+          <Route path="privacy" element={<Privacy />} />
+          <Route path="delete-account" element={<DeleteAccount />} />
           <Route path="login" element={<AuthPage mode="login" />} />
           <Route path="signup" element={<AuthPage mode="signup" />} />
           <Route path="my-bookings" element={<RequireAuth><MyBookings /></RequireAuth>} />

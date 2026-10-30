@@ -120,7 +120,7 @@ export default function Layout() {
             <p><Link to="/join/">🧰 {pick("Work with GharCare", "گھر کیئر کے ساتھ کام کریں")}</Link></p>
           </div>
         </div>
-        <div className="container footer-bottom">© {new Date().getFullYear()} GharCare. {t("rights")}</div>
+        <div className="container footer-bottom">© {new Date().getFullYear()} GharCare PK. {t("rights")} · <Link to="/privacy/">Privacy</Link> · <Link to="/delete-account/">Delete account</Link></div>
       </footer>
 
       <a className="wa-fab" href={waLink(settings.whatsapp, "Assalam o Alaikum GharCare, I need a worker.")} target="_blank" rel="noreferrer" aria-label={t("whatsappUs")}>

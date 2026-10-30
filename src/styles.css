@@ -341,3 +341,6 @@ html[dir="rtl"] .banner-nav { transform: translateY(-50%) scaleX(-1); }
 .check { display: flex; align-items: center; gap: 8px; font-weight: 500; cursor: pointer; }
 .check input { width: 18px; height: 18px; accent-color: var(--primary, #0E7C61); }
 .note-box { background: #FFF6DB; border: 1px solid #F0D58A; color: #5C4300; border-radius: 12px; padding: 10px 14px; line-height: 1.5; margin: 8px 0 20px; }
+.legal h2 { font-size: 1.15rem; margin: 24px 0 8px; }
+.legal p, .legal li { line-height: 1.65; }
+.legal ul, .legal ol { padding-inline-start: 20px; display: grid; gap: 6px; }

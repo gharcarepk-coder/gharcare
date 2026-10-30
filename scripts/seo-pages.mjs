@@ -30,6 +30,7 @@ for (const [route, p] of Object.entries(PAGES)) {
     .replace(/<meta property="og:url" content="[^"]*"\s*\/?>/, `<meta property="og:url" content="${canonical}" />`)
     .replace(/<meta property="og:title" content="[^"]*"\s*\/?>/, `<meta property="og:title" content="${esc(p.title)}" />`)
     .replace(/<meta property="og:description" content="[^"]*"\s*\/?>/, `<meta property="og:description" content="${esc(p.description)}" />`);
+  if (p.schema) html = html.replace("</head>", `  <script type="application/ld+json">${JSON.stringify(p.schema).replace(/</g, "\\u003c")}</script>\n  </head>`);
   for (const must of [canonical, esc(p.title)]) if (!html.includes(must)) throw new Error(`SEO tag missing for ${route}`);
   const out = route === "/" ? path.join(root, "dist/index.html") : path.join(root, "dist", route.slice(1), "index.html");
   fs.mkdirSync(path.dirname(out), { recursive: true });

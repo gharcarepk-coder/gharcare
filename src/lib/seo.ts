@@ -2,11 +2,11 @@
 // build time (scripts/seo-pages.mjs writes a static HTML file per page for crawlers).
 export const SITE = "https://www.gharcarepk.com";
 
-export type PageSeo = { title: string; description: string; index: boolean };
+export type PageSeo = { title: string; description: string; index: boolean; schema?: Record<string, unknown> };
 
 export const PAGES: Record<string, PageSeo> = {
   "/": {
-    title: "GharCare گھر کیئر — Cleaner, Plumber, Electrician, Mechanic on Demand | Lahore",
+    title: "GharCare PK گھر کیئر — Cleaner, Plumber, Electrician, Mechanic on Demand | Lahore",
     description: "Book verified cleaners, plumbers, electricians, AC technicians, mechanics, painters and helpers in Lahore by the hour or day. Pay by JazzCash or Easypaisa after the job.",
     index: true,
   },
@@ -21,8 +21,33 @@ export const PAGES: Record<string, PageSeo> = {
     index: true,
   },
   "/app": {
-    title: "Download the GharCare App — Android & iPhone",
-    description: "Get the GharCare app to book home workers in one tap. Free Android download; iPhone users can add GharCare to the home screen.",
+    title: "GharCare PK App Download — Free Android APK | Home Services Lahore",
+    description: "Download the official GharCare PK app (APK) for Android. Book cleaners, plumbers, electricians, AC technicians and mechanics in Lahore in one tap. Free, about 10 MB.",
+    index: true,
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "MobileApplication",
+      name: "GharCare PK",
+      alternateName: ["GharCare", "Ghar Care PK", "گھر کیئر"],
+      operatingSystem: "Android",
+      applicationCategory: "LifestyleApplication",
+      description: "Book verified home workers in Lahore by the hour or day: cleaning, plumbing, electrical, AC, mechanic, painting, carpentry and helpers.",
+      url: "https://www.gharcarepk.com/app/",
+      downloadUrl: "https://github.com/gharcarepk-coder/gharcare/releases/download/android-latest/GharCare.apk",
+      image: "https://www.gharcarepk.com/icons/icon-512.png",
+      inLanguage: ["en", "ur"],
+      offers: { "@type": "Offer", price: "0", priceCurrency: "PKR" },
+      publisher: { "@type": "Organization", name: "GharCare PK", url: "https://www.gharcarepk.com/" },
+    },
+  },
+  "/privacy": {
+    title: "Privacy Policy | GharCare PK",
+    description: "How GharCare PK collects, uses and protects your information on the website and Android app.",
+    index: true,
+  },
+  "/delete-account": {
+    title: "Delete Your Account | GharCare PK",
+    description: "How to delete your GharCare PK account and personal data.",
     index: true,
   },
   "/join": {
