@@ -7,12 +7,12 @@ export type PageSeo = { title: string; description: string; index: boolean; sche
 export const PAGES: Record<string, PageSeo> = {
   "/": {
     title: "GharCare PK گھر کیئر — Cleaner, Plumber, Electrician, Mechanic on Demand | Lahore",
-    description: "Book verified cleaners, plumbers, electricians, AC technicians, mechanics, painters and helpers in Lahore by the hour or day. Pay by JazzCash or Easypaisa after the job.",
+    description: "Book verified cleaners, solar panel cleaners, plumbers, electricians, AC technicians, mechanics, painters and helpers in Lahore by the hour or day. Pay by JazzCash or Easypaisa after the job.",
     index: true,
   },
   "/services": {
-    title: "Home Services & Rates in Lahore — Cleaning, Plumbing, Electrical, AC | GharCare",
-    description: "All GharCare services in Lahore: house and deep cleaning, plumber, electrician, AC service, car and bike mechanic, painter, carpenter and helpers. Hourly or daily booking.",
+    title: "Home Services & Rates in Lahore — Cleaning, Solar Panel Cleaning, Plumbing, AC | GharCare PK",
+    description: "All GharCare PK services in Lahore: house and deep cleaning, solar panel cleaning, plumber, electrician, AC service, car and bike mechanic, painter, carpenter and helpers. Hourly or daily booking.",
     index: true,
   },
   "/book": {
