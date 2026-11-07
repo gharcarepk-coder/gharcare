@@ -1,11 +1,12 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { rs, supabase, todayISO, useApp } from "../lib/data";
+import { getPosition, rs, supabase, todayISO, useApp } from "../lib/data";
 import { useI18n } from "../lib/i18n";
 
 type Draft = {
   serviceId: string; type: "hourly" | "daily"; qty: number; workers: number;
   date: string; time: string; areaId: string; address: string; notes: string;
+  lat?: number | null; lng?: number | null;
 };
 
 const DRAFT_KEY = "gc_booking_draft";
@@ -30,10 +31,24 @@ export default function Book() {
     areaId: saved.areaId || "",
     address: saved.address || "",
     notes: saved.notes || "",
+    lat: saved.lat ?? null,
+    lng: saved.lng ?? null,
   });
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState<number | null>(null);
+  const [done, setDone] = useState<{ id: string; ref: number } | null>(null);
+  const [locMsg, setLocMsg] = useState("");
+
+  const pinLocation = async () => {
+    setLocMsg(t("saving"));
+    try {
+      const p = await getPosition();
+      setD((x) => ({ ...x, lat: p.coords.latitude, lng: p.coords.longitude }));
+      setLocMsg("");
+    } catch (e) {
+      setLocMsg((e as Error).message === "denied" ? t("locDenied") : t("gpsError"));
+    }
+  };
 
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setD((p) => ({ ...p, [k]: v }));
   const svc = services.find((s) => s.id === d.serviceId);
@@ -82,11 +97,13 @@ export default function Book() {
       quantity: d.qty,
       workers: d.workers,
       notes: d.notes.trim() || null,
-    }).select("ref_no").single();
+      customer_lat: d.lat ?? null,
+      customer_lng: d.lng ?? null,
+    }).select("id, ref_no").single();
     setBusy(false);
     if (error) { setErr(t("errGeneric")); console.error(error); return; }
     try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
-    setDone(data.ref_no as number);
+    setDone({ id: data.id as string, ref: data.ref_no as number });
     window.scrollTo({ top: 0 });
   };
 
@@ -97,8 +114,9 @@ export default function Book() {
           <div className="card center success-card">
             <div className="big-check">✓</div>
             <h1 className="page-title">{t("booked")}</h1>
-            <p className="lead">{t("bookedSub", { ref: done })}</p>
-            <Link to="/my-bookings" className="btn btn-lg">{t("viewBookings")}</Link>
+            <p className="lead">{t("bookedSub", { ref: done.ref })}</p>
+            <Link to={`/track/${done.id}`} className="btn btn-lg">📍 {t("trackWorker")}</Link>
+            <p><Link to="/my-bookings">{t("viewBookings")}</Link></p>
           </div>
         </div>
       </section>
@@ -182,6 +200,14 @@ export default function Book() {
             <span>{t("address")}</span>
             <textarea rows={2} value={d.address} onChange={(e) => set("address", e.target.value)} placeholder={t("addressHint")} required />
           </label>
+          <div className="field loc-field">
+            {d.lat != null && d.lng != null ? (
+              <p className="ok">✓ {t("locationAdded")} <button type="button" className="link-btn" onClick={() => setD((x) => ({ ...x, lat: null, lng: null }))}>✕</button></p>
+            ) : (
+              <button type="button" className="btn btn-sm btn-ghost" onClick={pinLocation}>{t("useMyLocation")}</button>
+            )}
+            <small className="muted">{locMsg || t("useMyLocationHint")}</small>
+          </div>
 
           <label className="field">
             <span>{t("notes")}</span>

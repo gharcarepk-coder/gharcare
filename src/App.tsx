@@ -9,6 +9,8 @@ import AppDownload from "./pages/AppDownload";
 import Join from "./pages/Join";
 import { DeleteAccount, Privacy } from "./pages/Legal";
 import AuthPage from "./pages/Auth";
+import Track from "./pages/Track";
+import Worker from "./pages/Worker";
 import { Account, MyBookings, NotFound, RequireAuth } from "./pages/Customer";
 import AdminLayout from "./pages/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
@@ -39,6 +41,8 @@ export default function App() {
           <Route path="signup" element={<AuthPage mode="signup" />} />
           <Route path="my-bookings" element={<RequireAuth><MyBookings /></RequireAuth>} />
           <Route path="account" element={<RequireAuth><Account /></RequireAuth>} />
+          <Route path="track/:id" element={<RequireAuth><Track /></RequireAuth>} />
+          <Route path="worker" element={<RequireAuth><Worker /></RequireAuth>} />
           <Route path="*" element={<NotFound />} />
         </Route>
         <Route path="admin" element={<AdminLayout />}>

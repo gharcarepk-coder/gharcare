@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Area, Booking, BookingStatus, fmtDate, fmtTime, prettyPhone, rs, Service, Staff, STATUSES, supabase, waLink } from "../../lib/data";
+import { Link, useSearchParams } from "react-router-dom";
+import { ACTIVE_STATUSES, Area, Booking, BookingStatus, fmtDate, fmtTime, prettyPhone, rs, Service, Staff, STATUSES, supabase, waLink } from "../../lib/data";
 
 export default function Bookings() {
   const [params, setParams] = useSearchParams();
@@ -14,7 +14,7 @@ export default function Bookings() {
 
   const load = async () => {
     let query = supabase.from("bookings").select("*").order("work_date", { ascending: status === "active" }).order("start_time").limit(300);
-    if (status === "active") query = query.in("status", ["pending", "confirmed", "assigned", "in_progress"]);
+    if (status === "active") query = query.in("status", ACTIVE_STATUSES);
     else if (status !== "all") query = query.eq("status", status);
     const { data } = await query;
     setRows((data as Booking[]) || []);
@@ -51,7 +51,7 @@ export default function Bookings() {
       <div className="toolbar">
         <div className="chips">
           {["active", ...STATUSES, "all"].map((s) => (
-            <button key={s} className={`chip ${status === s ? "on" : ""}`} onClick={() => setParam("status", s)}>{s.replace("_", " ")}</button>
+            <button key={s} className={`chip ${status === s ? "on" : ""}`} onClick={() => setParam("status", s)}>{s.replace(/_/g, " ")}</button>
           ))}
         </div>
         <input className="search" placeholder="Search name, phone, #ref, address" value={q} onChange={(e) => setQ(e.target.value)} />
@@ -74,7 +74,7 @@ export default function Bookings() {
                   <td>{b.quantity}{b.booking_type === "hourly" ? "h" : "d"} × {b.workers}</td>
                   <td>{rs(b.final_amount ?? b.est_total)}</td>
                   <td>{staffName(b.staff_id) || <span className="muted">—</span>}</td>
-                  <td><em className={`pill pill-${b.status}`}>{b.status.replace("_", " ")}</em></td>
+                  <td><em className={`pill pill-${b.status}`}>{b.status.replace(/_/g, " ")}</em></td>
                 </tr>
               ))}
             </tbody>
@@ -123,8 +123,9 @@ function BookingDrawer({ b, service, area, staff, onClose, onSaved }: {
     onSaved();
   };
 
-  const jobText = `GharCare Job #${b.ref_no}\n${service?.name_en}\n${fmtDate(b.work_date)} at ${fmtTime(b.start_time)}\n${b.quantity} ${b.booking_type === "hourly" ? "hours" : "days"} × ${b.workers} worker(s)\nCustomer: ${b.customer_name} ${prettyPhone(b.customer_phone)}\nAddress: ${b.address}${area ? ", " + area : ""}${b.notes ? `\nWork: ${b.notes}` : ""}`;
-  const custText = `Assalam o Alaikum ${b.customer_name}, your GharCare booking #${b.ref_no} (${service?.name_en}) on ${fmtDate(b.work_date)} at ${fmtTime(b.start_time)} is confirmed.${worker ? ` Your worker: ${worker.full_name} ${prettyPhone(worker.phone)}.` : ""} Estimated: ${rs(b.est_total)}. Thank you!`;
+  const appLine = worker?.user_id ? `\nOpen GharCare app → My jobs, and tap "Start trip" when you leave.` : "";
+  const jobText = `GharCare Job #${b.ref_no}\n${service?.name_en}\n${fmtDate(b.work_date)} at ${fmtTime(b.start_time)}\n${b.quantity} ${b.booking_type === "hourly" ? "hours" : "days"} × ${b.workers} worker(s)\nCustomer: ${b.customer_name} ${prettyPhone(b.customer_phone)}\nAddress: ${b.address}${area ? ", " + area : ""}${b.notes ? `\nWork: ${b.notes}` : ""}${appLine}`;
+  const custText = `Assalam o Alaikum ${b.customer_name}, your GharCare booking #${b.ref_no} (${service?.name_en}) on ${fmtDate(b.work_date)} at ${fmtTime(b.start_time)} is confirmed.${worker ? ` Your worker: ${worker.full_name} ${prettyPhone(worker.phone)}.` : ""} Estimated: ${rs(b.est_total)}. Track your worker live: https://www.gharcarepk.com/track/${b.id} Thank you!`;
 
   return (
     <div className="drawer-backdrop" onClick={onClose}>
@@ -142,10 +143,16 @@ function BookingDrawer({ b, service, area, staff, onClose, onSaved }: {
           <dt>Address</dt><dd>{b.address}{area && `, ${area}`}</dd>
           {b.notes && (<><dt>Customer notes</dt><dd>{b.notes}</dd></>)}
           <dt>Booked</dt><dd>{new Date(b.created_at).toLocaleString("en-GB")}</dd>
+          {b.customer_lat != null && b.customer_lng != null && (<><dt>Map pin</dt><dd><a href={`https://www.google.com/maps?q=${b.customer_lat},${b.customer_lng}`} target="_blank" rel="noreferrer">Open in Google Maps</a></dd></>)}
+          {(b.on_way_at || b.arrived_at || b.started_at || b.completed_at) && (<><dt>Worker steps</dt><dd>
+            {[["On the way", b.on_way_at], ["Arrived", b.arrived_at], ["Started", b.started_at], ["Completed", b.completed_at]]
+              .filter(([, v]) => v).map(([k, v]) => `${k} ${new Date(v as string).toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true })}`).join(" · ")}
+          </dd></>)}
         </dl>
         <div className="btn-row">
           <a className="btn btn-sm btn-ghost" href={`tel:${b.customer_phone}`}>📞 Call customer</a>
           <a className="btn btn-sm btn-ghost" href={waLink(b.customer_phone, custText)} target="_blank" rel="noreferrer">💬 WhatsApp customer</a>
+          {b.status !== "cancelled" && <Link className="btn btn-sm btn-ghost" to={`/track/${b.id}`} target="_blank">📍 Live tracking</Link>}
         </div>
 
         <div className="form">
@@ -161,7 +168,7 @@ function BookingDrawer({ b, service, area, staff, onClose, onSaved }: {
           )}
           <label className="field"><span>Status</span>
             <select value={status} onChange={(e) => setStatus(e.target.value as BookingStatus)}>
-              {STATUSES.map((s) => <option key={s} value={s}>{s.replace("_", " ")}</option>)}
+              {STATUSES.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
             </select>
           </label>
           <label className="field"><span>Final amount collected (Rs)</span>

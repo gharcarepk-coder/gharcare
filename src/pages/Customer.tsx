@@ -63,6 +63,11 @@ export function MyBookings() {
                   {b.staff_phone && <a className="btn btn-sm btn-ghost" href={`tel:${b.staff_phone}`}>📞 {t("callWorker")} {prettyPhone(b.staff_phone)}</a>}
                 </div>
               )}
+              {b.status !== "cancelled" && b.status !== "completed" && (
+                <Link to={`/track/${b.id}`} className={`btn btn-block track-btn ${["on_the_way", "arrived"].includes(b.status) ? "track-live" : "btn-ghost"}`}>
+                  {["on_the_way", "arrived"].includes(b.status) && <span className="live-dot" />}📍 {t("trackWorker")}
+                </Link>
+              )}
               <div className="bc-foot">
                 <span>{t("total")}: <b>{rs(b.final_amount ?? b.est_total)}</b></span>
                 {(b.status === "pending" || b.status === "confirmed") && (

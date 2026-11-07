@@ -22,15 +22,30 @@ export type Staff = {
   daily_wage: number; status: "applied" | "active" | "on_leave" | "inactive" | "rejected"; notes: string | null; joined_on: string; created_at: string;
   address: string | null; emergency_name: string | null; emergency_phone: string | null; wage_method: string | null;
   cnic_verified: boolean; police_verified: boolean; experience: string | null; source: "admin" | "website";
+  user_id: string | null;
 };
-export type BookingStatus = "pending" | "confirmed" | "assigned" | "in_progress" | "completed" | "cancelled";
+export type BookingStatus = "pending" | "confirmed" | "assigned" | "on_the_way" | "arrived" | "in_progress" | "completed" | "cancelled";
 export type Booking = {
   id: string; ref_no: number; customer_id: string; customer_name: string; customer_phone: string; service_id: string;
   area_id: string | null; address: string; booking_type: "hourly" | "daily"; work_date: string; start_time: string;
   quantity: number; workers: number; rate: number; est_total: number; travel_charge: number; notes: string | null; status: BookingStatus;
   staff_id: string | null; final_amount: number | null; admin_notes: string | null; created_at: string; updated_at: string;
+  customer_lat: number | null; customer_lng: number | null;
+  on_way_at: string | null; arrived_at: string | null; started_at: string | null; completed_at: string | null;
 };
-export const STATUSES: BookingStatus[] = ["pending", "confirmed", "assigned", "in_progress", "completed", "cancelled"];
+export const STATUSES: BookingStatus[] = ["pending", "confirmed", "assigned", "on_the_way", "arrived", "in_progress", "completed", "cancelled"];
+/** Statuses of a booking that is still open (not finished or cancelled). */
+export const ACTIVE_STATUSES: BookingStatus[] = ["pending", "confirmed", "assigned", "on_the_way", "arrived", "in_progress"];
+
+/** One-shot GPS reading. Rejects with "denied" when the user blocks location. */
+export function getPosition(): Promise<GeolocationPosition> {
+  return new Promise((resolve, reject) => {
+    if (!("geolocation" in navigator)) return reject(new Error("unsupported"));
+    navigator.geolocation.getCurrentPosition(resolve,
+      (e) => reject(new Error(e.code === e.PERMISSION_DENIED ? "denied" : "unavailable")),
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 10000 });
+  });
+}
 
 // ---------------------------------------------------------------- helpers
 export function normalizePhone(raw: string): string | null {
@@ -96,6 +111,8 @@ const DEFAULT_SETTINGS: Settings = {
 type AppCtx = {
   session: Session | null; profile: Profile | null; authReady: boolean;
   settings: Settings; categories: Category[]; services: Service[]; areas: Area[]; catalogReady: boolean;
+  /** Full name of the linked GharCare worker, when this login belongs to active staff. */
+  workerName: string | null;
   refreshProfile: () => Promise<void>; refreshCatalog: () => Promise<void>;
 };
 const Ctx = createContext<AppCtx>(null as unknown as AppCtx);
@@ -103,6 +120,7 @@ const Ctx = createContext<AppCtx>(null as unknown as AppCtx);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [workerName, setWorkerName] = useState<string | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -111,9 +129,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [catalogReady, setCatalogReady] = useState(false);
 
   const loadProfile = useCallback(async (uid?: string) => {
-    if (!uid) { setProfile(null); return; }
-    const { data } = await supabase.from("profiles").select("*").eq("id", uid).maybeSingle();
+    if (!uid) { setProfile(null); setWorkerName(null); return; }
+    const [{ data }, w] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
+      supabase.rpc("am_i_worker"),
+    ]);
     setProfile((data as Profile) ?? null);
+    setWorkerName((w.data as string | null) || null);
   }, []);
 
   const refreshCatalog = useCallback(async (retried = false): Promise<void> => {
@@ -153,7 +175,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   return (
     <Ctx.Provider value={{
-      session, profile, authReady, settings, categories, services, areas, catalogReady,
+      session, profile, authReady, settings, categories, services, areas, catalogReady, workerName,
       refreshProfile: () => loadProfile(session?.user.id), refreshCatalog,
     }}>
       {children}

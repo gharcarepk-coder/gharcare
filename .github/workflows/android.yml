@@ -27,6 +27,12 @@ jobs:
       - run: echo "ANDROID_HOME=$ANDROID_HOME" && ls $ANDROID_HOME
       - run: npm install
       - run: npx cap add android
+      - name: Allow GPS for live worker tracking
+        run: |
+          M=android/app/src/main/AndroidManifest.xml
+          sed -i 's#<uses-permission android:name="android.permission.INTERNET" />#&\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-feature android:name="android.hardware.location.gps" android:required="false" />#' $M
+          grep -q ACCESS_FINE_LOCATION $M || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n</manifest>#' $M
+          grep -q ACCESS_FINE_LOCATION $M
       - run: npx capacitor-assets generate --android --iconBackgroundColor '#FFFFFF' --splashBackgroundColor '#FFFFFF'
       - run: npx cap sync android
       - name: Build APK

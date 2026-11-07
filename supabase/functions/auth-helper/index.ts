@@ -2,7 +2,9 @@
 // actions:
 //   signup         { phone, password, full_name }      -> creates confirmed user
 //   reset_password { phone, password }  (admin only)    -> sets a new password
-import { createClient } from "jsr:@supabase/supabase-js@2";
+//   worker_login   { staff_id, password } (admin only)  -> creates/updates the worker's login
+//                                                         and links it to the staff record
+import { createClient, SupabaseClient } from "jsr:@supabase/supabase-js@2";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -13,7 +15,7 @@ const cors = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
 
-export function normalizePhone(raw: string): string | null {
+function normalizePhone(raw: string): string | null {
   let d = String(raw || "").replace(/\D/g, "");
   if (d.startsWith("0092")) d = d.slice(2);
   if (d.startsWith("03") && d.length === 11) d = "92" + d.slice(1);
@@ -21,6 +23,15 @@ export function normalizePhone(raw: string): string | null {
   return /^923\d{9}$/.test(d) ? d : null;
 }
 const phoneEmail = (p: string) => `${p}@phone.gharcare.pk`;
+
+async function requireAdmin(req: Request, admin: SupabaseClient): Promise<Response | null> {
+  const token = (req.headers.get("Authorization") || "").replace("Bearer ", "");
+  const { data: caller } = await admin.auth.getUser(token);
+  if (!caller?.user) return json({ error: "unauthorized" }, 401);
+  const { data: prof } = await admin.from("profiles").select("role").eq("id", caller.user.id).single();
+  if (prof?.role !== "admin") return json({ error: "forbidden" }, 403);
+  return null;
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
@@ -33,10 +44,41 @@ Deno.serve(async (req) => {
   let body: Record<string, string>;
   try { body = await req.json(); } catch { return json({ error: "Invalid request" }, 400); }
 
+  const password = String(body.password || "");
+  if (password.length < 6 || password.length > 72) return json({ error: "weak_password" }, 400);
+
+  if (body.action === "worker_login") {
+    const denied = await requireAdmin(req, admin);
+    if (denied) return denied;
+    const { data: staff } = await admin.from("staff").select("id, full_name, phone").eq("id", body.staff_id).maybeSingle();
+    if (!staff) return json({ error: "not_found" }, 404);
+    const phone = normalizePhone(staff.phone);
+    if (!phone) return json({ error: "invalid_phone" }, 400);
+
+    let userId: string | null = null;
+    const { data: prof } = await admin.from("profiles").select("id").eq("phone", "+" + phone).maybeSingle();
+    if (prof) {
+      userId = prof.id;
+      const { error } = await admin.auth.admin.updateUserById(prof.id, { password });
+      if (error) return json({ error: error.message }, 400);
+    } else {
+      const { data, error } = await admin.auth.admin.createUser({
+        email: phoneEmail(phone),
+        password,
+        email_confirm: true,
+        user_metadata: { full_name: staff.full_name, phone: "+" + phone },
+      });
+      if (error || !data.user) return json({ error: error?.message || "create_failed" }, 400);
+      userId = data.user.id;
+    }
+    await admin.from("staff").update({ user_id: null }).eq("user_id", userId).neq("id", staff.id);
+    const { error: linkErr } = await admin.from("staff").update({ user_id: userId }).eq("id", staff.id);
+    if (linkErr) return json({ error: linkErr.message }, 400);
+    return json({ ok: true });
+  }
+
   const phone = normalizePhone(body.phone);
   if (!phone) return json({ error: "invalid_phone" }, 400);
-  const password = String(body.password || "");
-  if (password.length < 6) return json({ error: "weak_password" }, 400);
 
   if (body.action === "signup") {
     const full_name = String(body.full_name || "").trim().slice(0, 80);
@@ -51,16 +93,12 @@ Deno.serve(async (req) => {
       const exists = /already|registered|exists/i.test(error.message);
       return json({ error: exists ? "phone_taken" : error.message }, exists ? 409 : 400);
     }
-    return json({ ok: true, email: phoneEmail(phone) });
+    return json({ ok: true });
   }
 
   if (body.action === "reset_password") {
-    const token = (req.headers.get("Authorization") || "").replace("Bearer ", "");
-    const { data: caller } = await admin.auth.getUser(token);
-    if (!caller?.user) return json({ error: "unauthorized" }, 401);
-    const { data: prof } = await admin.from("profiles").select("role").eq("id", caller.user.id).single();
-    if (prof?.role !== "admin") return json({ error: "forbidden" }, 403);
-
+    const denied = await requireAdmin(req, admin);
+    if (denied) return denied;
     const { data: target } = await admin.from("profiles").select("id").eq("phone", "+" + phone).maybeSingle();
     if (!target) return json({ error: "not_found" }, 404);
     const { error } = await admin.auth.admin.updateUserById(target.id, { password });
