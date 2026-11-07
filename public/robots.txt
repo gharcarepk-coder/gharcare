@@ -3,5 +3,7 @@ Allow: /
 Disallow: /admin
 Disallow: /account
 Disallow: /my-bookings
+Disallow: /track
+Disallow: /worker
 
 Sitemap: https://www.gharcarepk.com/sitemap.xml

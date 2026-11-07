@@ -81,7 +81,7 @@ export function StaffPage() {
       "Daily wage (Rs)", "Wage paid by", "Status", "Joining date", "CNIC verified", "Police verification", "Source", "Notes", "Added on"];
     const lines = (shown || []).map((s) => [s.full_name, prettyPhone(s.phone), s.cnic, catName(s.category_id)?.name_en, areaName(s.area_id),
       s.address, s.experience, s.emergency_name, s.emergency_phone ? prettyPhone(s.emergency_phone) : "", s.daily_wage, s.wage_method,
-      s.status.replace("_", " "), s.joined_on, s.cnic_verified ? "Yes" : "No", s.police_verified ? "Yes" : "No", s.source, s.notes,
+      s.status.replace(/_/g, " "), s.joined_on, s.cnic_verified ? "Yes" : "No", s.police_verified ? "Yes" : "No", s.source, s.notes,
       s.created_at.slice(0, 10)].map(csvCell).join(","));
     const blob = new Blob(["﻿" + [head.join(","), ...lines].join("\n")], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
@@ -131,8 +131,8 @@ export function StaffPage() {
                   <td>{s.cnic}</td>
                   <td>{areaName(s.area_id)}</td>
                   <td>{s.daily_wage ? rs(s.daily_wage) : "—"}</td>
-                  <td><small>{s.cnic_verified ? "✅" : "⬜"} CNIC<br />{s.police_verified ? "✅" : "⬜"} Police</small></td>
-                  <td><em className={`pill pill-${statusPill(s.status)}`}>{s.status === "applied" ? "new" : s.status.replace("_", " ")}</em></td>
+                  <td><small>{s.cnic_verified ? "✅" : "⬜"} CNIC<br />{s.police_verified ? "✅" : "⬜"} Police<br />{s.user_id ? "✅" : "⬜"} App login</small></td>
+                  <td><em className={`pill pill-${statusPill(s.status)}`}>{s.status === "applied" ? "new" : s.status.replace(/_/g, " ")}</em></td>
                   <td style={{ whiteSpace: "nowrap" }}>
                     {s.status === "applied" && <>
                       <button className="link-btn" onClick={() => setStatus(s, "active")}>Approve</button>{" · "}
@@ -192,9 +192,41 @@ export function StaffPage() {
             <label className="field"><span>Notes</span><textarea rows={2} value={edit.notes} onChange={(e) => setEdit({ ...edit, notes: e.target.value })} /></label>
             {msg && <p className="error">{msg}</p>}
             <button className="btn btn-block">Save</button>
+            {edit.id && edit.status === "active" && (
+              <WorkerLogin staffId={edit.id} phone={edit.phone} linked={!!rows?.find((r) => r.id === edit.id)?.user_id} onDone={load} />
+            )}
           </form>
         </div>
       )}
+    </div>
+  );
+}
+
+// ======================================================================= Worker app login
+function WorkerLogin({ staffId, phone, linked, onDone }: { staffId: string; phone: string; linked: boolean; onDone: () => void }) {
+  const [pw, setPw] = useState("");
+  const [msg, setMsg] = useState("");
+  const go = async () => {
+    if (pw.length < 6) { setMsg("Password must be at least 6 characters."); return; }
+    setMsg("Saving…");
+    try {
+      await callAuthHelper({ action: "worker_login", staff_id: staffId, password: pw });
+      setMsg(`Done ✓ Worker logs in on gharcarepk.com or the app with mobile ${phone} and this password, then opens "My jobs".`);
+      setPw("");
+      onDone();
+    } catch (e) { setMsg("Error: " + (e as Error).message); }
+  };
+  return (
+    <div className="card worker-login">
+      <h3>📱 Worker app login {linked ? <em className="pill pill-completed">active</em> : <em className="pill pill-cancelled">not set</em>}</h3>
+      <p className="muted small">The worker uses this to open "My jobs", update job status and share live location with the customer.
+        {linked ? " Setting a new password replaces the old one." : ""}</p>
+      <div className="row2">
+        <label className="field"><span>{linked ? "New password" : "Password"}</span>
+          <input value={pw} onChange={(e) => setPw(e.target.value)} placeholder="At least 6 characters" autoComplete="off" dir="ltr" /></label>
+        <div className="field"><span>&nbsp;</span><button type="button" className="btn btn-ghost" onClick={go}>{linked ? "Reset password" : "Create login"}</button></div>
+      </div>
+      {msg && <p className="ok small">{msg}</p>}
     </div>
   );
 }

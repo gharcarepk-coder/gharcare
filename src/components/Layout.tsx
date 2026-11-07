@@ -60,7 +60,7 @@ function InstallBanner() {
 
 export default function Layout() {
   const { t, lang, setLang, pick } = useI18n();
-  const { session, profile, settings } = useApp();
+  const { session, profile, settings, workerName } = useApp();
   const nav = useNavigate();
   const [open, setOpen] = useState(false);
   const announcement = pick(settings.announcement_en, settings.announcement_ur);
@@ -75,6 +75,7 @@ export default function Layout() {
           <Logo />
           <nav className={`nav ${open ? "nav-open" : ""}`} onClick={() => setOpen(false)}>
             <NavLink to="/services/">{t("ourServices")}</NavLink>
+            {workerName && <NavLink to="/worker">🛵 {t("myJobs")}</NavLink>}
             {session && <NavLink to="/my-bookings">{t("myBookings")}</NavLink>}
             {profile?.role === "admin" && <NavLink to="/admin">{t("admin")}</NavLink>}
             {session ? (

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { prettyPhone, useApp, waLink } from "../lib/data";
 
-const UPDATED = "30 October 2026";
+const UPDATED = "7 November 2026";
 
 export function Privacy() {
   const { settings } = useApp();
@@ -16,9 +16,11 @@ export function Privacy() {
         <ul>
           <li><b>Customers:</b> your name, mobile number and password when you create an account; the address, area, date, time and job details you enter when you book; and the status and price of your bookings.</li>
           <li><b>Workers who apply:</b> name, mobile number, CNIC number, type of work, area, home address, experience and an emergency contact.</li>
+          <li><b>Location (customers, optional):</b> if you tap "Use my current location" or "Pin my home location", we save that point with your booking so the worker can find you.</li>
+          <li><b>Location (GharCare workers):</b> while a worker has a job marked "On the way" or "Arrived", the app sends the worker's live location so the customer can see them coming. Only the latest point is kept, and it is deleted as soon as the job moves on or ends.</li>
           <li><b>Technical data:</b> your language choice and basic login information stored on your device so you stay signed in.</li>
         </ul>
-        <p>We do not collect your location, contacts, photos or payment card details. Payments are made directly by JazzCash or Easypaisa.</p>
+        <p>We do not collect your location except as described above, and we never collect it in the background. We do not collect your contacts, photos or payment card details. Payments are made directly by JazzCash or Easypaisa.</p>
 
         <h2>How we use it</h2>
         <ul>
@@ -30,7 +32,7 @@ export function Privacy() {
 
         <h2>Who we share it with</h2>
         <ul>
-          <li>The worker assigned to your booking sees your name, phone number and address so they can reach you.</li>
+          <li>The worker assigned to your booking sees your name, phone number, address and map pin so they can reach you. You see the worker's name, phone number and live location only while they are on the way to you.</li>
           <li>Our data is stored securely with our hosting and database providers (Supabase and Render), who process it only on our behalf.</li>
           <li>We may share information if required by Pakistani law.</li>
         </ul>

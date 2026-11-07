@@ -66,7 +66,7 @@ export default function Dashboard() {
             <Link key={b.id} to={`/admin/bookings?open=${b.id}`} className="mini-row">
               <b>{fmtTime(b.start_time)} · {svcName(b.service_id)}</b>
               <span>{b.customer_name} · {b.workers} worker(s)</span>
-              <em className={`pill pill-${b.status}`}>{b.status.replace("_", " ")}</em>
+              <em className={`pill pill-${b.status}`}>{b.status.replace(/_/g, " ")}</em>
             </Link>
           ))}
         </div>
