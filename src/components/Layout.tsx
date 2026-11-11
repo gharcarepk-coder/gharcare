@@ -121,7 +121,7 @@ export default function Layout() {
           </div>
         </div>
         <div className="container footer-bottom">© {new Date().getFullYear()} GharCare PK. {t("rights")} · <Link to="/privacy/">Privacy</Link> · <Link to="/delete-account/">Delete account</Link>
-          <div className="footer-legal">{pick("Company registration with SECP in progress.", "ایس ای سی پی کے ساتھ کمپنی رجسٹریشن جاری ہے۔")}</div>
+          <div className="footer-legal">{pick("GharCare (Private) Limited · Registered with SECP · CUIN 0365638", "گھر کیئر (پرائیویٹ) لمیٹڈ · ایس ای سی پی میں رجسٹرڈ · CUIN 0365638")}</div>
         </div>
       </footer>
 
