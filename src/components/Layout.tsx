@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import CallButton from "./CallButton";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { supabase, useApp, waLink, prettyPhone } from "../lib/data";
+import { supabase, useApp, waLink } from "../lib/data";
 import { useI18n } from "../lib/i18n";
 
 export function Logo({ light = false }: { light?: boolean }) {
@@ -107,7 +108,7 @@ export default function Layout() {
           </div>
           <div>
             <h4>{t("contact")}</h4>
-            <p><a href={`tel:${settings.phone}`}>📞 {prettyPhone(settings.phone)}</a></p>
+            <p><CallButton className="footer-call" /></p>
             <p><a href={waLink(settings.whatsapp)} target="_blank" rel="noreferrer">💬 WhatsApp</a></p>
             <p><a href={`mailto:${settings.email}`}>✉️ {settings.email}</a></p>
             <p><a href="https://www.gharcarepk.com/">🌐 www.gharcarepk.com</a></p>

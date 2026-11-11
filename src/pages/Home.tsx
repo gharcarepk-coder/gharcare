@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import CallButton from "../components/CallButton";
 import { rs, useApp, waLink } from "../lib/data";
 import { useI18n } from "../lib/i18n";
 import { WaIcon } from "../components/Layout";
@@ -99,7 +100,7 @@ export default function Home() {
           </div>
           <div className="hero-actions">
             <Link to="/book/" className="btn btn-lg btn-light">{t("bookNow")}</Link>
-            <a href={`tel:${settings.phone}`} className="btn btn-lg btn-outline-light">📞 {settings.phone}</a>
+            <CallButton className="btn btn-lg btn-outline-light" />
           </div>
         </div>
       </section>

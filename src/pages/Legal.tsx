@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { prettyPhone, useApp, waLink } from "../lib/data";
+import { useApp, waLink } from "../lib/data";
+import CallButton from "../components/CallButton";
 
 const UPDATED = "30 October 2026";
 
@@ -45,7 +46,7 @@ export function Privacy() {
         <p>Our service is for adults. We do not knowingly collect information from anyone under 18.</p>
 
         <h2>Contact</h2>
-        <p>Email {settings.email} · Phone/WhatsApp {prettyPhone(settings.phone)}</p>
+        <p>Email {settings.email} · <CallButton /> · <a href={waLink(settings.whatsapp)} target="_blank" rel="noreferrer">WhatsApp</a></p>
       </div>
     </section>
   );
@@ -61,7 +62,7 @@ export function DeleteAccount() {
         <p>You can ask us to delete your GharCare PK account and the personal data linked to it, from the website or the Android app.</p>
         <h2>How to request deletion</h2>
         <ol>
-          <li>Send us a message on <a href={waLink(settings.whatsapp, msg)} target="_blank" rel="noreferrer">WhatsApp ({prettyPhone(settings.whatsapp)})</a> or email <b>{settings.email}</b> with the subject “Delete my account”.</li>
+          <li>Send us a message on <a href={waLink(settings.whatsapp, msg)} target="_blank" rel="noreferrer">WhatsApp</a> or email <b>{settings.email}</b> with the subject “Delete my account”.</li>
           <li>Send it from, or include, the mobile number you registered with.</li>
           <li>We confirm by phone and delete the account within 7 days.</li>
         </ol>
